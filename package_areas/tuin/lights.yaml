@@ -1,0 +1,10 @@
+- platform: group
+  name: Muurlampen
+  unique_id: buiten_muurlampen
+  entities:
+    - light.muurlamp_1
+    - light.muurlamp_2
+    - light.muurlamp_3     
+    - light.muurlamp_4
+    - light.muurlamp_5
+    - light.muurlamp_6     

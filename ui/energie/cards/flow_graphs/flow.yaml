@@ -1,0 +1,16 @@
+type: custom:power-flow-card-plus
+title: 🔄 Energie Flow
+w_decimals: 0
+kw_decimals: 2
+entities:
+  grid:
+    entity: sensor.grid_power
+    name: Net
+  solar:
+    entity: sensor.goodwe_pv_power
+    name: Zonnepanelen
+  home:
+    entity: sensor.home_power
+    name: Huis
+display_zero_lines:
+  mode: hide

@@ -1,0 +1,11 @@
+- platform: group
+  name: Gamekamer Plafond
+  unique_id: gamekamer_plafond
+  entities:
+    - light.gameroom_plafond_1
+    - light.gameroom_plafond_2
+    - light.gameroom_plafond_3
+    - light.gameroom_plafond_4
+    - light.gameroom_plafond_5
+    - light.gameroom_plafond_6
+    - light.gameroom_plafond_7        

@@ -1,0 +1,6 @@
+type: gauge
+name: Huisverbruik (nu)
+entity: sensor.home_power
+unit: W
+min: 0
+max: 6000

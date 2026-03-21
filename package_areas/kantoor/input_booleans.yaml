@@ -1,0 +1,19 @@
+kantoor_dim_plafond_up:
+  name: Kantoor dim plafond omhoog
+  icon: mdi:brightness-7
+
+kantoor_dim_plafond_down:
+  name: Kantoor dim plafond omlaag
+  icon: mdi:brightness-5
+
+kantoor_dim_decor_up:
+  name: Kantoor dim decor omhoog
+  icon: mdi:brightness-7
+
+kantoor_dim_decor_down:
+  name: Kantoor dim decor omlaag
+  icon: mdi:brightness-5
+
+homepod_push_kantoor:
+  name: Homepod push kantoor
+  icon: mdi:thermometer

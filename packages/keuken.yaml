@@ -1,0 +1,5 @@
+light: !include ../package_areas/keuken/lights.yaml
+automation: !include ../package_areas/keuken/automations.yaml
+input_number: !include ../package_areas/keuken/input_numbers.yaml
+template: !include ../package_areas/keuken/templates.yaml
+scene: !include ../package_areas/keuken/scenes.yaml

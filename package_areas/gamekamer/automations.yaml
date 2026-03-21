@@ -1,0 +1,108 @@
+- id: gamekamer_motion_lighting
+  alias: Gamekamer - Motion verlichting met work mode override
+  mode: restart
+  trigger:
+    - platform: state
+      entity_id: binary_sensor.gameroom_sensor_motion
+      to: "on"
+      id: motion_on
+
+    - platform: state
+      entity_id: input_boolean.gamekamer_work_mode
+      to: "on"
+      id: work_mode_on
+
+    - platform: state
+      entity_id: input_boolean.gamekamer_work_mode
+      to: "off"
+      id: work_mode_off
+
+  action:
+    - choose:
+        # Work mode aangezet -> alles direct stoppen / blokkeren
+        - conditions:
+            - condition: trigger
+              id: work_mode_on
+          sequence:
+            - service: input_boolean.turn_off
+              target:
+                entity_id: input_boolean.gamekamer_motion_active
+            - stop: "Work mode is aan; motion automation volledig geblokkeerd"
+
+    # Alleen verder als work mode uit staat
+    - condition: state
+      entity_id: input_boolean.gamekamer_work_mode
+      state: "off"
+
+    # Alleen verder als er nu motion is
+    - condition: state
+      entity_id: binary_sensor.gameroom_sensor_motion
+      state: "on"
+
+    # Scene altijd opnieuw toepassen
+    - choose:
+        # 21:00 - 08:00
+        - conditions:
+            - condition: or
+              conditions:
+                - condition: time
+                  after: "21:00:00"
+                - condition: time
+                  before: "08:00:00"
+          sequence:
+            - service: scene.turn_on
+              target:
+                entity_id:
+                  - scene.gamekamer_nacht
+                  - scene.toilet_boven_nachtlampje
+                  - scene.badkamer_nachtlampje
+
+        # 08:00 - 15:00
+        - conditions:
+            - condition: time
+              after: "08:00:00"
+              before: "15:00:00"
+          sequence:
+            - service: scene.turn_on
+              target:
+                entity_id: scene.gamekamer_ontspannen
+
+        # 15:00 - 21:00
+        - conditions:
+            - condition: time
+              after: "15:00:00"
+              before: "21:00:00"
+          sequence:
+            - service: scene.turn_on
+              target:
+                entity_id: scene.gamekamer_concentreren
+
+    - service: input_boolean.turn_on
+      target:
+        entity_id: input_boolean.gamekamer_motion_active
+
+    # Wacht tot er 10 minuten onafgebroken geen motion is
+    - wait_for_trigger:
+        - platform: state
+          entity_id: binary_sensor.gameroom_sensor_motion
+          to: "off"
+          for: "00:10:00"
+
+    - condition: state
+      entity_id: input_boolean.gamekamer_work_mode
+      state: "off"
+
+    - condition: state
+      entity_id: input_boolean.gamekamer_motion_active
+      state: "on"
+
+    - service: light.turn_off
+      target:
+        entity_id:
+          - light.gamekamer
+          - light.toilet_boven
+          - light.badkamer
+
+    - service: input_boolean.turn_off
+      target:
+        entity_id: input_boolean.gamekamer_motion_active

@@ -1,0 +1,2 @@
+light: !include ../package_areas/badkamer/lights.yaml
+template: !include ../package_areas/badkamer/templates.yaml

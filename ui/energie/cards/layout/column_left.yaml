@@ -1,0 +1,9 @@
+type: vertical-stack
+view_layout:
+  grid-area: left
+cards:
+  - !include ../gauges/pv.yaml
+  - !include ../gauges/home.yaml
+  - !include ../gauges/grid.yaml
+  - !include ../tesla/tesla_battery.yaml
+  - !include ../water/watermeter.yaml

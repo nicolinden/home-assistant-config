@@ -1,0 +1,7 @@
+# Groep voor woonkamer plafondlampen
+- platform: group
+  name: Woonkamer Plafond
+  unique_id: woonkamer_plafond
+  entities:
+    - light.woonkamer_plafond_1
+    - light.woonkamer_plafond_2

@@ -1,0 +1,6 @@
+energie-live:
+  mode: yaml
+  title: Energie Live
+  icon: mdi:lightning-bolt
+  show_in_sidebar: true
+  filename: ui/energie/dashboard.yaml

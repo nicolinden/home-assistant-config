@@ -1,0 +1,128 @@
+- sensor:
+    - name: "kitt_open_doors_count"
+      unique_id: kitt_open_doors_count
+      icon: mdi:car-door
+      state: >
+        {{
+          [
+            states('binary_sensor.k_i_t_t_front_driver_door'),
+            states('binary_sensor.k_i_t_t_front_passenger_door'),
+            states('binary_sensor.k_i_t_t_rear_driver_door'),
+            states('binary_sensor.k_i_t_t_rear_passenger_door')
+          ] | select('eq', 'on') | list | count
+        }}
+
+    - name: "kitt_open_windows_count"
+      unique_id: kitt_open_windows_count
+      icon: mdi:car-door
+      state: >
+        {{
+          [
+            states('binary_sensor.k_i_t_t_front_driver_window'),
+            states('binary_sensor.k_i_t_t_front_passenger_window'),
+            states('binary_sensor.k_i_t_t_rear_driver_window'),
+            states('binary_sensor.k_i_t_t_rear_passenger_window')
+          ] | select('eq', 'on') | list | count
+        }}
+
+    - name: kitt_time_to_full_charge_remaining
+      icon: mdi:clock-outline
+      state: >
+        {% set finish = states('sensor.k_i_t_t_time_to_full_charge') %}
+        {% if finish not in ['unknown','unavailable',''] %}
+          {% set diff = (as_timestamp(finish) - as_timestamp(now())) | int %}
+          {% if diff <= 0 %}
+            Vol
+          {% else %}
+            {% set hours = diff // 3600 %}
+            {% set minutes = (diff % 3600) // 60 %}
+            {{ hours }}u {{ minutes }}m
+          {% endif %}
+        {% else %}
+          -
+        {% endif %}        
+        
+
+    # - name: "kitt_access_summary"
+    #   unique_id: kitt_access_summary
+    #   icon: mdi:car-info
+    #   state: >
+    #     {% set doors = states('sensor.kitt_open_doors_count') | int(0) %}
+    #     {% set windows = states('sensor.kitt_open_windows_count') | int(0) %}
+    #     {% set trunk = is_state('cover.k_i_t_t_trunk', 'open') %}
+    #     {% set frunk = is_state('cover.k_i_t_t_frunk', 'open') %}
+    #     {% set charge_port = is_state('cover.k_i_t_t_charge_port_door', 'open') %}
+    #     {% set locked = is_state('lock.k_i_t_t_lock', 'locked') %}
+
+    #     {% if doors > 0 %}
+    #       {{ doors }} deur{{ 'en' if doors != 1 else '' }} open
+    #     {% elif windows > 0 %}
+    #       {{ windows }} raam{{ 'en' if windows != 1 else '' }} open
+    #     {% elif trunk %}
+    #       Kofferbak open
+    #     {% elif frunk %}
+    #       Frunk open
+    #     {% elif charge_port %}
+    #       Laadpoort open
+    #     {% elif not locked %}
+    #       Auto unlocked
+    #     {% else %}
+    #       Alles secure
+    #     {% endif %}
+    #   attributes:
+    #     open_doors: "{{ states('sensor.kitt_open_doors_count') | int(0) }}"
+    #     open_windows: "{{ states('sensor.kitt_open_windows_count') | int(0) }}"
+    #     trunk_open: "{{ is_state('cover.k_i_t_t_trunk', 'open') }}"
+    #     frunk_open: "{{ is_state('cover.k_i_t_t_frunk', 'open') }}"
+    #     charge_port_open: "{{ is_state('cover.k_i_t_t_charge_port_door', 'open') }}"
+    #     locked: "{{ is_state('lock.k_i_t_t_lock', 'locked') }}"
+
+- binary_sensor:
+    - name: "kitt_any_door_open"
+      unique_id: kitt_any_door_open
+      icon: mdi:car-door
+      state: >
+        {{
+          is_state('binary_sensor.k_i_t_t_front_driver_door', 'on') or
+          is_state('binary_sensor.k_i_t_t_front_passenger_door', 'on') or
+          is_state('binary_sensor.k_i_t_t_rear_driver_door', 'on') or
+          is_state('binary_sensor.k_i_t_t_rear_passenger_door', 'on')
+        }}
+
+    - name: "kitt_any_window_open"
+      unique_id: kitt_any_window_open
+      icon: mdi:car-door
+      state: >
+        {{
+          is_state('binary_sensor.k_i_t_t_front_driver_window', 'on') or
+          is_state('binary_sensor.k_i_t_t_front_passenger_window', 'on') or
+          is_state('binary_sensor.k_i_t_t_rear_driver_window', 'on') or
+          is_state('binary_sensor.k_i_t_t_rear_passenger_window', 'on')
+        }}
+
+    # - name: "kitt_trunk_open"
+    #   unique_id: kitt_trunk_open
+    #   icon: mdi:car-back
+    #   state: "{{ is_state('cover.k_i_t_t_trunk', 'open') }}"
+
+    # - name: "kitt_frunk_open"
+    #   unique_id: kitt_frunk_open
+    #   icon: mdi:car-front
+    #   state: "{{ is_state('cover.k_i_t_t_frunk', 'open') }}"
+
+    # - name: "kitt_charge_port_open"
+    #   unique_id: kitt_charge_port_open
+    #   icon: mdi:ev-plug-tesla
+    #   state: "{{ is_state('cover.k_i_t_t_charge_port_door', 'open') }}"
+
+    # - name: "kitt_any_opening_open"
+    #   unique_id: kitt_any_opening_open
+    #   icon: mdi:car-connected
+    #   state: >
+    #     {{
+    #       is_state('binary_sensor.kitt_any_door_open', 'on') or
+    #       is_state('binary_sensor.kitt_any_window_open', 'on') or
+    #       is_state('binary_sensor.kitt_trunk_open', 'on') or
+    #       is_state('binary_sensor.kitt_frunk_open', 'on') or
+    #       is_state('binary_sensor.kitt_charge_port_open', 'on')
+    #     }}

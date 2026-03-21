@@ -1,0 +1,10 @@
+type: entities
+title: 📤 Export (kWh)
+show_header_toggle: false
+entities:
+  - entity: sensor.p1_meter_energy_export
+    name: Totaal
+  - entity: sensor.p1_meter_energy_export_tariff_1
+    name: Dal (T1)
+  - entity: sensor.p1_meter_energy_export_tariff_2
+    name: Normaal (T2)

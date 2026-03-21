@@ -1,0 +1,105 @@
+- binary_sensor:
+    - name: hal_lights_on
+      unique_id: hal_lights_on
+      state: >
+        {% set ignore = label_entities('dontCountAsLight') | list %}
+        {% set ids = area_entities('hal')
+          | select('match','^light\\.')
+          | reject('in', ignore)
+          | list %}
+        {{ ids | count > 0 and (expand(ids) | selectattr('state','eq','on') | list | count > 0) }}
+
+- sensor:
+    - name: hal_lights_on_count
+      unique_id: hal_lights_on_count
+      icon: mdi:lightbulb
+      state: >
+        {% set ignore = label_entities('dontCountAsLight') | list %}
+        {% set ids = area_entities('hal')
+          | select('match','^light\\.')
+          | reject('in', ignore)
+          | list %}
+        {{ expand(ids) | selectattr('state','eq','on') | list | count }}
+
+    - name: Water today
+      unique_id: water_today_l
+      unit_of_measurement: "L"
+      icon: mdi:water
+      state: "{{ (states('sensor.water_today_raw')|float(0) * 1000) | round(0) }}"
+
+    - name: Water cost today
+      unique_id: water_cost_today
+      unit_of_measurement: "€"
+      icon: mdi:currency-eur
+      state: >
+        {% set m3 = states('sensor.water_today_raw')|float(0) %}
+        {% set tariff = states('input_number.water_tariff_eur_per_m3')|float(1.67) %}
+        {% set fixed_year = states('input_number.water_fixed_yearly_eur')|float(114.07) %}
+        {% set fixed_day = fixed_year / 365 %}
+        {{ (m3 * tariff + fixed_day) | round(2) }}
+
+    # kWh vandaag
+    - name: Grid import today
+      unique_id: grid_import_today_kwh
+      unit_of_measurement: "kWh"
+      state: >
+        {{ (states('sensor.grid_import_t1_today')|float(0)
+          + states('sensor.grid_import_t2_today')|float(0)) | round(3) }}
+
+    - name: Grid export today
+      unique_id: grid_export_today_kwh
+      unit_of_measurement: "kWh"
+      state: >
+        {{ (states('sensor.grid_export_t1_today')|float(0)
+          + states('sensor.grid_export_t2_today')|float(0)) | round(3) }}
+
+    - name: Grid net today
+      unique_id: grid_net_today_kwh
+      unit_of_measurement: "kWh"
+      state: >
+        {{ (states('sensor.grid_import_today')|float(0)
+          - states('sensor.grid_export_today')|float(0)) | round(3) }}
+
+    # € vandaag (tarieven uit input_numbers)
+    - name: Grid import cost today
+      unique_id: grid_import_cost_today
+      unit_of_measurement: "€"
+      icon: mdi:currency-eur
+      state: >
+        {% set i1 = states('sensor.grid_import_t1_today')|float(0) %}
+        {% set i2 = states('sensor.grid_import_t2_today')|float(0) %}
+        {% set p1 = states('input_number.elec_import_t1_eur_per_kwh')|float(0.25399) %}
+        {% set p2 = states('input_number.elec_import_t2_eur_per_kwh')|float(0.25641) %}
+        {{ (i1*p1 + i2*p2) | round(2) }}
+
+    - name: Grid export revenue today
+      unique_id: grid_export_revenue_today
+      unit_of_measurement: "€"
+      icon: mdi:currency-eur
+      state: >
+        {% set e1 = states('sensor.grid_export_t1_today')|float(0) %}
+        {% set e2 = states('sensor.grid_export_t2_today')|float(0) %}
+        {% set p1 = states('input_number.elec_export_t1_eur_per_kwh')|float(0.0) %}
+        {% set p2 = states('input_number.elec_export_t2_eur_per_kwh')|float(0.0) %}
+        {{ (e1*p1 + e2*p2) | round(2) }}
+
+    - name: Grid net cost today
+      unique_id: grid_net_cost_today
+      unit_of_measurement: "€"
+      icon: mdi:currency-eur
+      state: >
+        {% set cost = states('sensor.grid_import_cost_today')|float(0) %}
+        {% set rev  = states('sensor.grid_export_revenue_today')|float(0) %}
+        {{ (cost - rev) | round(2) }}
+
+- trigger:
+    - platform: state
+      entity_id: sensor.voordeur_last_activity
+      not_from:
+        - unknown
+        - unavailable
+  binary_sensor:
+    - name: "Voordeur Beweging"
+      unique_id: voordeur_beweging
+      state: "true"
+      auto_off: 30

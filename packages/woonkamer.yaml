@@ -1,0 +1,6 @@
+light: !include ../package_areas/woonkamer/lights.yaml
+template: !include ../package_areas/woonkamer/templates.yaml
+script: !include ../package_areas/woonkamer/scripts.yaml
+automation: !include ../package_areas/woonkamer/automations.yaml
+input_boolean: !include ../package_areas/woonkamer/input_booleans.yaml
+input_select: !include ../package_areas/woonkamer/input_selects.yaml

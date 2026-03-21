@@ -1,0 +1,117 @@
+lights_area_counted_control:
+  alias: Lights - Area counted control
+  mode: queued
+  fields:
+    area_id:
+      description: Home Assistant area_id (bijv. woonkamer, slaapkamer_jesse)
+      example: slaapkamer_jesse
+    action:
+      description: on / off / toggle
+      example: toggle
+  sequence:
+    - variables:
+        ignore: "{{ label_entities('dontCountAsLight') | list }}"
+        lights: >-
+          {{ area_entities(area_id)
+             | select('match','^light\\.')
+             | reject('in', ignore)
+             | list }}
+        any_on: "{{ expand(lights) | selectattr('state','eq','on') | list | count > 0 }}"
+    - choose:
+        - conditions: "{{ action == 'on' }}"
+          sequence:
+            - service: light.turn_on
+              target:
+                entity_id: "{{ lights }}"
+        - conditions: "{{ action == 'off' }}"
+          sequence:
+            - service: light.turn_off
+              target:
+                entity_id: "{{ lights }}"
+        - conditions: "{{ action == 'toggle' }}"
+          sequence:
+            - choose:
+                - conditions: "{{ any_on }}"
+                  sequence:
+                    - service: light.turn_off
+                      target:
+                        entity_id: "{{ lights }}"
+              default:
+                - service: light.turn_on
+                  target:
+                    entity_id: "{{ lights }}"
+
+lights_off_all_counted:
+  alias: Lights - All off (counted only)
+  mode: single
+  sequence:
+    - variables:
+        ignore: "{{ label_entities('dontCountAsLight') | list }}"
+        targets: >
+          {{ states.light
+             | rejectattr('entity_id','in', ignore)
+             | map(attribute='entity_id')
+             | list }}
+    - condition: template
+      value_template: "{{ targets | count > 0 }}"
+    - service: light.turn_off
+      target:
+        entity_id: "{{ targets }}"
+
+scene_avond:
+  alias: Scene Avond
+  mode: single
+  sequence:
+    - service: scene.turn_on
+      target:
+        entity_id:
+          - scene.buiten_avond
+          - scene.keuken_avond
+          - scene.woonkamer_avond
+    - service: light.turn_on
+      target:
+        entity_id: light.trap
+    - service: switch.turn_on
+      target:
+        entity_id: switch.smart_switch_outlet_1
+    - service: browser_mod.notification
+      data:
+        message: "Avond geactiveerd"
+        duration: 3000
+
+scene_avond_uit:
+  alias: Scene Avond uit
+  mode: single
+  sequence:
+    - service: light.turn_off
+      target:
+        area_id:
+          - woonkamer
+          - keuken
+          - hal
+    - service: light.turn_off
+      target:
+        entity_id:
+          - light.buiten
+    - service: switch.turn_off
+      target:
+        entity_id: switch.smart_switch_outlet_1
+    - service: browser_mod.notification
+      data:
+        message: "Alles uit"
+        duration: 2500
+
+scene_weltrusten:
+  alias: Weltrusten
+  mode: single
+  sequence:
+    - service: light.turn_off
+      target:
+        area_id:
+          - woonkamer
+          - keuken
+          - eethoek
+    - service: browser_mod.notification
+      data:
+        message: "Alles uit"
+        duration: 2500

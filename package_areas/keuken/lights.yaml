@@ -1,0 +1,16 @@
+- platform: group
+  unique_id: light_keukeneiland_group
+  name: Keukeneiland
+  entities:
+    - light.eiland_1
+    - light.eiland_2
+    - light.eiland_3
+
+- platform: group
+  unique_id: light_keukentafel_group
+  name: Keukentafel
+  entities:
+    - light.keukentafel_1
+    - light.keukentafel_2
+    - light.keukentafel_3
+    - light.keukentafel_4

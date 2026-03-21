@@ -1,0 +1,17 @@
+automation:
+script:
+scene:
+template:
+sensor:
+binary_sensor:
+light:
+switch:
+input_boolean:
+input_select:
+input_number:
+input_datetime:
+input_text:
+utility_meter:
+counter:
+timer:
+group:

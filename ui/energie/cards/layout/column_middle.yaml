@@ -1,0 +1,10 @@
+type: vertical-stack
+view_layout:
+  grid-area: middle
+cards:
+  - !include ../details/solar_entities.yaml
+  - !include ../details/grid_home_entities.yaml
+  - !include ../details/wifi_gauge.yaml
+  - !include ../details/import_export_grid.yaml
+  - !include ../details/phase_glance.yaml
+  - !include ../details/finance_block.yaml

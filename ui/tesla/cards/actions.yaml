@@ -1,0 +1,125 @@
+type: vertical-stack
+cards:
+  # =========================
+  # Charge port: alleen als GEEN kabel
+  # =========================
+
+  # variant 1: echte binary state
+  - type: conditional
+    conditions:
+      - entity: binary_sensor.k_i_t_t_charge_cable
+        state: "off"
+    card:
+      type: tile
+      entity: cover.k_i_t_t_charge_port_door
+      name: Charge port
+      icon: mdi:car-door
+      features:
+        - type: cover-open-close
+
+  # variant 2: NL tekst state
+  - type: conditional
+    conditions:
+      - entity: binary_sensor.k_i_t_t_charge_cable
+        state: "Verbroken"
+    card:
+      type: tile
+      entity: cover.k_i_t_t_charge_port_door
+      name: Charge port
+      icon: mdi:car-door
+      features:
+        - type: cover-open-close
+
+  # =========================
+  # Laden: alleen als WEL kabel
+  # =========================
+
+  # variant 1
+  - type: conditional
+    conditions:
+      - entity: binary_sensor.k_i_t_t_charge_cable
+        state: "on"
+    card:
+      type: tile
+      entity: switch.k_i_t_t_charge
+      name: Laden
+      icon: mdi:flash
+      tap_action:
+        action: toggle
+
+  # variant 2
+  - type: conditional
+    conditions:
+      - entity: binary_sensor.k_i_t_t_charge_cable
+        state: "Verbonden"
+    card:
+      type: tile
+      entity: switch.k_i_t_t_charge
+      name: Laden
+      icon: mdi:flash
+      tap_action:
+        action: toggle
+
+  # =========================
+  # Kabel lock: alleen als WEL kabel
+  # =========================
+
+  # variant 1
+  - type: conditional
+    conditions:
+      - entity: binary_sensor.k_i_t_t_charge_cable
+        state: "on"
+    card:
+      type: tile
+      entity: lock.k_i_t_t_charge_cable_lock
+      name: Kabel lock
+      icon: mdi:lock
+      tap_action:
+        action: more-info
+
+  # variant 2
+  - type: conditional
+    conditions:
+      - entity: binary_sensor.k_i_t_t_charge_cable
+        state: "Verbonden"
+    card:
+      type: tile
+      entity: lock.k_i_t_t_charge_cable_lock
+      name: Kabel lock
+      icon: mdi:lock
+      tap_action:
+        action: more-info
+
+  # =========================
+  # Charge limit: alleen als laden AAN staat
+  # =========================
+
+  # variant 1
+  - type: conditional
+    conditions:
+      - entity: binary_sensor.k_i_t_t_charge_cable
+        state: "on"
+      - entity: switch.k_i_t_t_charge
+        state: "on"
+    card:
+      type: entities
+      title: Charge limit
+      entities:
+        - entity: number.k_i_t_t_charge_limit
+          name: Charge limit
+          icon: mdi:ev-station
+
+  # variant 2
+  - type: conditional
+    conditions:
+      - entity: binary_sensor.k_i_t_t_charge_cable
+        state: "Verbonden"
+      - entity: switch.k_i_t_t_charge
+        state: "on"
+    card:
+      type: entities
+      title: Charge limit
+      entities:
+        - entity: number.k_i_t_t_charge_limit
+          name: Charge limit
+          icon: mdi:ev-station

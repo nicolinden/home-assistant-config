@@ -1,0 +1,6 @@
+type: gauge
+name: Net (nu)
+entity: sensor.grid_power
+unit: W
+min: -6000
+max: 6000

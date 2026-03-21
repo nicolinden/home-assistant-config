@@ -1,0 +1,55 @@
+# kitt_lock:
+#   alias: "KITT - Lock"
+#   icon: mdi:lock
+#   sequence:
+#     - service: lock.lock
+#       target:
+#         entity_id: lock.k_i_t_t_lock
+
+# kitt_unlock:
+#   alias: "KITT - Unlock"
+#   icon: mdi:lock-open-variant
+#   sequence:
+#     - service: lock.unlock
+#       target:
+#         entity_id: lock.k_i_t_t_lock
+
+# kitt_open_trunk:
+#   alias: "KITT - Open trunk"
+#   icon: mdi:car-back
+#   sequence:
+#     - service: cover.open_cover
+#       target:
+#         entity_id: cover.k_i_t_t_trunk
+
+# kitt_open_frunk:
+#   alias: "KITT - Open frunk"
+#   icon: mdi:car-front
+#   sequence:
+#     - service: cover.open_cover
+#       target:
+#         entity_id: cover.k_i_t_t_frunk
+
+# kitt_open_charge_port:
+#   alias: "KITT - Open charge port"
+#   icon: mdi:ev-plug-tesla
+#   sequence:
+#     - service: cover.open_cover
+#       target:
+#         entity_id: cover.k_i_t_t_charge_port_door
+
+# kitt_close_charge_port:
+#   alias: "KITT - Close charge port"
+#   icon: mdi:ev-plug-tesla
+#   sequence:
+#     - service: cover.close_cover
+#       target:
+#         entity_id: cover.k_i_t_t_charge_port_door
+
+# kitt_close_windows:
+#   alias: "KITT - Close windows"
+#   icon: mdi:car-door-lock
+#   sequence:
+#     - service: cover.close_cover
+#       target:
+#         entity_id: cover.k_i_t_t_windows

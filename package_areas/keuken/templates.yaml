@@ -1,0 +1,96 @@
+- binary_sensor:
+    - name: keuken_lights_on
+      unique_id: keuken_lights_on
+      state: >
+        {% set ignore = label_entities('dontCountAsLight') | list %}
+        {% set ids = area_entities('keuken')
+          | select('match','^light\\.')
+          | reject('in', ignore)
+          | list %}
+        {{ ids | count > 0 and (expand(ids) | selectattr('state','eq','on') | list | count > 0) }}
+
+    - name: "AEG Oven Aan"
+      unique_id: aeg_oven_aan
+      state: >
+        {{ states('sensor.aeg_oven_appliancestate') | lower == 'running' }}
+
+    - name: "AEG Oven Voorverwarmen"
+      unique_id: aeg_oven_voorverwarmen
+      state: >
+        {{
+          is_state('binary_sensor.aeg_oven_aan', 'on')
+          and states('sensor.aeg_oven_displaytemperaturec') | float(0)
+            < states('number.aeg_oven_targettemperaturec') | float(0)
+        }}
+
+    - name: "AEG Oven Op Temperatuur"
+      unique_id: aeg_oven_op_temperatuur
+      state: >
+        {{
+          is_state('binary_sensor.aeg_oven_aan', 'on')
+          and states('sensor.aeg_oven_displaytemperaturec') | float(0)
+            >= states('number.aeg_oven_targettemperaturec') | float(0)
+        }}
+
+    - name: "AEG Oven Koelt Af"
+      unique_id: aeg_oven_koelt_af
+      state: >
+        {{
+          is_state('binary_sensor.aeg_oven_aan', 'off')
+          and states('sensor.aeg_oven_displaytemperaturec') | float(0) > 50
+        }}
+
+    - name: "AEG Oven Edit Beschikbaar"
+      unique_id: aeg_oven_edit_beschikbaar
+      state: >
+        {{
+          is_state('binary_sensor.aeg_oven_doorstate', 'off')
+          and is_state('binary_sensor.aeg_oven_aan', 'off')
+          and is_state('switch.aeg_oven_cavitylight', 'on')
+        }}
+
+- sensor:
+    - name: keuken_lights_on_count
+      unique_id: keuken_lights_on_count
+      icon: mdi:lightbulb
+      state: >
+        {% set ignore = label_entities('dontCountAsLight') | list %}
+        {% set ids = area_entities('keuken')
+          | select('match','^light\\.')
+          | reject('in', ignore)
+          | list %}
+        {{ expand(ids) | selectattr('state','eq','on') | list | count }}
+
+    - name: "AEG Oven Runtime Min"
+      unique_id: aeg_oven_runtime_min
+      unit_of_measurement: "min"
+      state: >
+        {{ states('sensor.aeg_oven_runningtime') | float(0) | round(0) }}
+
+    - name: "AEG Oven Status Tekst"
+      unique_id: aeg_oven_status_tekst
+      state: >
+        {% set running = is_state('binary_sensor.aeg_oven_aan', 'on') %}
+        {% set current = states('sensor.aeg_oven_displaytemperaturec') | float(0) | round(0) %}
+        {% set target = states('number.aeg_oven_targettemperaturec') | float(0) | round(0) %}
+
+        {% if running and current < target %}
+          Voorverwarmen naar {{ target }}°C
+        {% elif running %}
+          Loopt
+        {% elif current > 50 %}
+          Afkoelen • {{ current }}°C
+        {% else %}
+          Standby
+        {% endif %}
+
+    - name: "AEG Oven Huidig Programma"
+      unique_id: aeg_oven_huidig_programma
+      state: >
+        {{ states('select.aeg_oven_program') }}
+
+    - name: "AEG Oven Huidige Temperatuur Afgerond"
+      unique_id: aeg_oven_huidige_temperatuur_afgerond
+      unit_of_measurement: "°C"
+      state: >
+        {{ states('sensor.aeg_oven_displaytemperaturec') | float(0) | round(0) }}

@@ -1,0 +1,65 @@
+- alias: Avondpreset bij zonsondergang
+  id: avondpreset_bij_zonsondergang
+  mode: single
+
+  trigger:
+    - platform: sun
+      event: sunset
+      offset: "-00:15:00"   # pas aan als je exact bij zonsondergang wilt
+
+  action:
+    - service: scene.turn_on
+      target:
+        entity_id:
+          - scene.keuken_avond
+          - scene.woonkamer_avond
+          - scene.buiten_avond
+
+    - service: switch.turn_on
+      target:
+        entity_id: switch.smart_switch_outlet_1
+
+    - service: light.turn_on
+      target:
+        entity_id: light.trap
+
+
+- alias: Ochtend reset - verlichting uit na zonsopkomst
+  id: ochtend_reset_verlichting
+  mode: single
+
+  trigger:
+    - platform: sun
+      event: sunrise
+      offset: "00:30:00"
+
+  action:
+    # Trap uit
+    - service: light.turn_off
+      target:
+        entity_id: light.trap
+
+    # Muurlampen uit
+    - service: light.turn_off
+      target:
+        entity_id: light.muurlampen
+
+    # Smart switch uit
+    - service: switch.turn_off
+      target:
+        entity_id: switch.smart_switch_outlet_1
+
+    # Keuken area uit (behalve de Tradfri driver)
+    - service: light.turn_off
+      target:
+        entity_id: >
+          {{ expand(area_entities('keuken'))
+             | selectattr('domain','eq','light')
+             | rejectattr('entity_id','eq','light.ikea_of_sweden_tradfri_driver_10w')
+             | map(attribute='entity_id')
+             | list }}
+
+    # Woonkamer area uit
+    - service: light.turn_off
+      target:
+        area_id: woonkamer

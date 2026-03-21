@@ -1,0 +1,50 @@
+# ================================
+# Home Assistant - Minimal Config Repo
+# ================================
+
+# ---- Secrets / keys / certificates ----
+secrets.yaml
+*.pem
+*.key
+*.crt
+*.p12
+*.pfx
+
+# ---- Home Assistant runtime/state ----
+.storage/
+.HA_VERSION
+.ha_run.lock
+
+# ---- Databases ----
+*.db
+*.db-shm
+*.db-wal
+
+# ---- Logs ----
+*.log
+*.log.*
+home-assistant.log.fault
+
+# ---- Cache / temp ----
+.cache/
+deps/
+tts/
+__pycache__/
+*.pyc
+
+# ---- HACS / vendor code (exclude completely) ----
+custom_components/
+
+# ---- Media / generated content ----
+image/
+media/
+downloads/
+
+# ---- Optional: exclude HACS frontend assets ----
+www/community/
+
+# ---- OS / editor ----
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/

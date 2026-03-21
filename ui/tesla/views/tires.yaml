@@ -1,0 +1,5 @@
+title: Tires
+path: tesla-tires
+subview: true
+cards:
+  - !include ../cards/tires.yaml

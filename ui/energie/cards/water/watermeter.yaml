@@ -1,0 +1,97 @@
+type: vertical-stack
+cards:
+  - type: custom:mushroom-title-card
+    title: Water
+    subtitle: HomeWizard water meter
+
+  # Live + Total naast elkaar (compact)
+  - type: horizontal-stack
+    cards:
+      - type: custom:mushroom-entity-card
+        entity: sensor.watermeter_water_usage
+        name: Live
+        icon: mdi:water
+        primary_info: name
+        secondary_info: state
+
+      - type: custom:mushroom-entity-card
+        entity: sensor.watermeter_total_water_usage
+        name: Total
+        icon: mdi:counter
+        primary_info: name
+        secondary_info: state
+
+  # Wi-Fi klein/compact + kleur op RSSI (zelfde stijl als P1)
+  - type: custom:mushroom-template-card
+    entity: sensor.watermeter_wi_fi_strength
+    primary: Wi-Fi
+    secondary: "{{ states('sensor.watermeter_wi_fi_strength') }} dBm"
+    icon: mdi:wifi
+    icon_color: >
+      {% set rssi = states('sensor.watermeter_wi_fi_strength') | int(-999) %}
+      {% if rssi > -60 %}
+        green
+      {% elif rssi > -75 %}
+        orange
+      {% else %}
+        red
+      {% endif %}
+
+  # Grafiek: water verbruik (live) - laatste 24 uur
+  - type: custom:apexcharts-card
+    header:
+      show: true
+      title: 💧 Waterverbruik (24u)
+      show_states: true
+    graph_span: 24h
+    now:
+      show: true
+    apex_config:
+      chart:
+        height: 220
+      stroke:
+        width: 2
+        curve: smooth
+      grid:
+        strokeDashArray: 4
+      legend:
+        show: false
+    yaxis:
+      - decimals: 1
+    series:
+      - entity: sensor.watermeter_water_usage
+        name: Live verbruik
+        type: area
+        opacity: 0.25
+        group_by:
+          duration: 5min
+          func: avg
+
+  # Grafiek: totaal water (daglijn / trend)
+  - type: custom:apexcharts-card
+    header:
+      show: true
+      title: 📈 Totaal water (trend)
+      show_states: true
+    graph_span: 7d
+    now:
+      show: true
+    apex_config:
+      chart:
+        height: 200
+      stroke:
+        width: 2
+        curve: straight
+      grid:
+        strokeDashArray: 4
+      legend:
+        show: false
+    yaxis:
+      - decimals: 0
+    series:
+      - entity: sensor.watermeter_total_water_usage
+        name: Totaal
+        type: line
+        group_by:
+          duration: 1h
+          func: max

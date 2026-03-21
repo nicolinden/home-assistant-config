@@ -1,0 +1,2 @@
+light: !include ../package_areas/tuin/lights.yaml
+template: !include ../package_areas/tuin/templates.yaml

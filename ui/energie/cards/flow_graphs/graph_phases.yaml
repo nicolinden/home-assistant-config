@@ -1,0 +1,44 @@
+type: custom:apexcharts-card
+header:
+  show: true
+  title: 📊 Vandaag – P1 per fase
+  show_states: true
+graph_span: 24h
+span:
+  start: day
+now:
+  show: true
+apex_config:
+  chart:
+    height: 300
+  stroke:
+    width: 2
+    curve: straight
+  grid:
+    strokeDashArray: 4
+  legend:
+    show: true
+    position: bottom
+yaxis:
+  - decimals: 0
+series:
+  - entity: sensor.p1_meter_power
+    name: Totaal
+    group_by:
+      duration: 5min
+      func: avg
+  - entity: sensor.p1_meter_power_phase_1
+    name: L1
+    group_by:
+      duration: 5min
+      func: avg
+  - entity: sensor.p1_meter_power_phase_2
+    name: L2
+    group_by:
+      duration: 5min
+      func: avg
+  - entity: sensor.p1_meter_power_phase_3
+    name: L3
+    group_by:
+      duration: 5min
+      func: avg

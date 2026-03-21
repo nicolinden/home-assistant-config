@@ -1,0 +1,3 @@
+automation: !include ../package_areas/tesla/automations.yaml
+# script: !include ../package_areas/tesla/scripts.yaml
+template: !include ../package_areas/tesla/templates.yaml

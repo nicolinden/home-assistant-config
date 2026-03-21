@@ -1,0 +1,255 @@
+type: custom:mushroom-chips-card
+chips:
+
+  ############################################################
+  # Battery
+  ############################################################
+
+  - type: template
+    entity: sensor.k_i_t_t_battery_level
+    icon: >
+      {% set s = states(entity) %}
+      {% if s in ['unknown','unavailable','none','None',''] %}
+        mdi:battery-unknown
+      {% else %}
+        {% set p = s | int %}
+        {% if p >= 95 %} mdi:battery
+        {% elif p >= 85 %} mdi:battery-90
+        {% elif p >= 75 %} mdi:battery-80
+        {% elif p >= 65 %} mdi:battery-70
+        {% elif p >= 55 %} mdi:battery-60
+        {% elif p >= 45 %} mdi:battery-50
+        {% elif p >= 35 %} mdi:battery-40
+        {% elif p >= 25 %} mdi:battery-30
+        {% elif p >= 15 %} mdi:battery-20
+        {% else %} mdi:battery-10
+        {% endif %}
+      {% endif %}
+    icon_color: >
+      {% set s = states(entity) %}
+      {% if s in ['unknown','unavailable','none','None',''] %}
+        grey
+      {% else %}
+        {% set p = s | int %}
+        {% if p < 30 %} red
+        {% elif p < 60 %} amber
+        {% else %} green
+        {% endif %}
+      {% endif %}
+    content: >
+      {% set s = states(entity) %}
+      {% if s in ['unknown','unavailable','none','None',''] %}
+        —
+      {% else %}
+        {{ s }}%
+      {% endif %}
+    tap_action:
+      action: fire-dom-event
+      browser_mod:
+        service: browser_mod.popup
+        data:
+          title: Batterij
+          content:
+            type: vertical-stack
+            cards:
+              - type: entity
+                entity: sensor.k_i_t_t_battery_level
+                name: Batterij
+              - type: entity
+                entity: sensor.k_i_t_t_estimate_battery_range
+                name: Range (est.)
+              - type: custom:mushroom-template-card
+                primary: Laden details
+                icon: mdi:ev-station
+                layout: horizontal
+                tap_action:
+                  action: fire-dom-event
+                  browser_mod:
+                    service: browser_mod.popup
+                    data:
+                      title: Laden details
+                      content: !include ../cards/charge_panel.yaml
+
+
+  ############################################################
+  # Tesla wake / online status  (ALTIJD ZICHTBARE KNOP)
+  ############################################################
+
+  - type: template
+    entity: button.k_i_t_t_wake
+    icon: >
+      {% set st = states('binary_sensor.k_i_t_t_status') %}
+      {% if st in ['off','unknown','unavailable'] %}
+        mdi:sleep-off
+      {% else %}
+        mdi:car-connected
+      {% endif %}
+    icon_color: >
+      {% set st = states('binary_sensor.k_i_t_t_status') %}
+      {% if st in ['off','unknown','unavailable'] %}
+        amber
+      {% else %}
+        green
+      {% endif %}
+    content: >
+      {% set st = states('binary_sensor.k_i_t_t_status') %}
+      {% if st in ['off','unknown','unavailable'] %}
+        WAKE
+      {% else %}
+        Online
+      {% endif %}
+    tap_action:
+      action: call-service
+      service: button.press
+      target:
+        entity_id: button.k_i_t_t_wake
+    hold_action:
+      action: call-service
+      service: button.press
+      target:
+        entity_id: button.k_i_t_t_wake
+
+
+  ############################################################
+  # Charge limit
+  ############################################################
+
+  - type: template
+    entity: number.k_i_t_t_charge_limit
+    icon: >
+      {% set s = states(entity) %}
+      {% if s in ['unknown','unavailable','none','None',''] %}
+        mdi:battery-unknown
+      {% else %}
+        {% set p = s | int %}
+        {% if p >= 95 %} mdi:battery
+        {% elif p >= 85 %} mdi:battery-90
+        {% elif p >= 75 %} mdi:battery-80
+        {% elif p >= 65 %} mdi:battery-70
+        {% elif p >= 55 %} mdi:battery-60
+        {% elif p >= 45 %} mdi:battery-50
+        {% elif p >= 35 %} mdi:battery-40
+        {% elif p >= 25 %} mdi:battery-30
+        {% elif p >= 15 %} mdi:battery-20
+        {% else %} mdi:battery-10
+        {% endif %}
+      {% endif %}
+    icon_color: blue
+    content: >
+      {% set s = states(entity) %}
+      {% if s in ['unknown','unavailable','none','None',''] %}
+        —
+      {% else %}
+        {{ s }}%
+      {% endif %}
+    tap_action:
+      action: fire-dom-event
+      browser_mod:
+        service: browser_mod.popup
+        data:
+          title: Charge limit
+          content:
+            type: entities
+            show_header_toggle: false
+            entities:
+              - entity: number.k_i_t_t_charge_limit
+                name: Charge limit
+
+
+  ############################################################
+  # Energy added
+  ############################################################
+
+  - type: template
+    entity: sensor.k_i_t_t_charge_energy_added
+    icon: >
+      {% if states(entity) | float(0) > 0 %}
+        mdi:flash
+      {% else %}
+        mdi:ev-station
+      {% endif %}
+    icon_color: amber
+    content: "{{ states(entity) }} kWh"
+    tap_action:
+      action: more-info
+
+
+  ############################################################
+  # Charging status
+  ############################################################
+
+  - type: template
+    entity: sensor.k_i_t_t_charging
+    icon: mdi:flash
+    icon_color: amber
+    content: "{{ states(entity) }}"
+    tap_action:
+      action: fire-dom-event
+      browser_mod:
+        service: browser_mod.popup
+        data:
+          title: Laden
+          content:
+            type: markdown
+            content: >
+              {% set t = states('sensor.k_i_t_t_time_to_full_charge') %}
+              {% if t not in ['unknown','unavailable','none','None',''] %}
+                ⏱ Tijd tot vol: **{{ t }} uur**
+              {% else %}
+                ⏱ Tijd tot vol: **onbekend**
+              {% endif %}
+
+
+  ############################################################
+  # Fun actions
+  ############################################################
+
+  - type: template
+    icon: mdi:bell-outline
+    content: ""
+    icon_color: grey
+    tap_action:
+      action: fire-dom-event
+      browser_mod:
+        service: browser_mod.popup
+        data:
+          title: Fun acties
+          content:
+            type: vertical-stack
+            cards:
+
+              - type: tile
+                entity: button.k_i_t_t_play_fart
+                name: Play fart
+                icon: mdi:emoticon-poop
+                tap_action:
+                  action: more-info
+                hold_action:
+                  action: call-service
+                  service: button.press
+                  target:
+                    entity_id: button.k_i_t_t_play_fart
+
+              - type: tile
+                entity: button.k_i_t_t_flash_lights
+                name: Flash lights
+                icon: mdi:car-light-high
+                tap_action:
+                  action: more-info
+                hold_action:
+                  action: call-service
+                  service: button.press
+                  target:
+                    entity_id: button.k_i_t_t_flash_lights
+
+              - type: tile
+                entity: button.k_i_t_t_honk_horn
+                name: Honk horn
+                icon: mdi:bullhorn
+                tap_action:
+                  action: more-info
+                hold_action:
+                  action: call-service
+                  service: button.press
+                  target:
+                    entity_id: button.k_i_t_t_honk_horn

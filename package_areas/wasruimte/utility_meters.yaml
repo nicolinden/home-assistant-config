@@ -1,0 +1,12 @@
+p1_import_t1_day:
+  source: sensor.p1_meter_energy_import_tariff_1
+  cycle: daily
+p1_import_t2_day:
+  source: sensor.p1_meter_energy_import_tariff_2
+  cycle: daily
+p1_export_t1_day:
+  source: sensor.p1_meter_energy_export_tariff_1
+  cycle: daily
+p1_export_t2_day:
+  source: sensor.p1_meter_energy_export_tariff_2
+  cycle: daily

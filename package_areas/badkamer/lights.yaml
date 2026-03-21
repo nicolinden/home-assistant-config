@@ -1,0 +1,8 @@
+- platform: group
+  name: Badkamer Plafond
+  unique_id: badkamer_plafond
+  entities:
+    - light.badkamer_plafond_1
+    - light.badkamer_plafond_2
+    - light.badkamer_plafond_3
+    - light.badkamer_plafond_4

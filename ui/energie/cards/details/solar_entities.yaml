@@ -1,0 +1,10 @@
+type: entities
+title: ☀️ Zonnepanelen
+show_header_toggle: false
+entities:
+  - entity: sensor.goodwe_pv_power
+    name: Actueel vermogen
+  - entity: sensor.goodwe_today_s_pv_generation
+    name: Opbrengst vandaag
+  - entity: sensor.goodwe_total_pv_generation
+    name: Totaal opbrengst

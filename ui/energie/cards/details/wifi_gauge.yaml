@@ -1,0 +1,14 @@
+type: custom:mushroom-template-card
+entity: sensor.p1_meter_wi_fi_strength
+primary: P1 Wi-Fi
+secondary: "{{ states('sensor.p1_meter_wi_fi_strength') }} dBm"
+icon: mdi:wifi
+icon_color: >
+  {% set rssi = states('sensor.p1_meter_wi_fi_strength') | int %}
+  {% if rssi > -60 %}
+    green
+  {% elif rssi > -75 %}
+    orange
+  {% else %}
+    red
+  {% endif %}

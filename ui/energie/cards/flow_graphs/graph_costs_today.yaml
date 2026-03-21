@@ -1,0 +1,43 @@
+type: custom:apexcharts-card
+header:
+  show: true
+  title: 💶 Vandaag – Kosten vs Opbrengst
+  show_states: true
+graph_span: 24h
+span:
+  start: day
+now:
+  show: true
+apex_config:
+  chart:
+    height: 260
+  stroke:
+    width: 3
+    curve: smooth
+  grid:
+    strokeDashArray: 4
+  legend:
+    show: true
+    position: bottom
+yaxis:
+  - decimals: 2
+series:
+  - entity: sensor.energy_import_cost_today
+    name: Kosten
+    type: line
+    group_by:
+      duration: 5min
+      func: last
+  - entity: sensor.energy_export_revenue_today
+    name: Opbrengst
+    type: line
+    group_by:
+      duration: 5min
+      func: last
+  - entity: sensor.energy_net_result_today
+    name: Netto
+    type: line
+    stroke_dash: 6
+    group_by:
+      duration: 5min
+      func: last

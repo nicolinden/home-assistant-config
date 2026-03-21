@@ -1,0 +1,22 @@
+- binary_sensor:
+    - name: badkamer_lights_on
+      unique_id: badkamer_lights_on
+      state: >
+        {% set ignore = label_entities('dontCountAsLight') | list %}
+        {% set ids = area_entities('badkamer')
+          | select('match','^light\\.')
+          | reject('in', ignore)
+          | list %}
+        {{ ids | count > 0 and (expand(ids) | selectattr('state','eq','on') | list | count > 0) }}
+
+- sensor:
+    - name: badkamer_lights_on_count
+      unique_id: badkamer_lights_on_count
+      icon: mdi:lightbulb
+      state: >
+        {% set ignore = label_entities('dontCountAsLight') | list %}
+        {% set ids = area_entities('badkamer')
+          | select('match','^light\\.')
+          | reject('in', ignore)
+          | list %}
+        {{ expand(ids) | selectattr('state','eq','on') | list | count }}

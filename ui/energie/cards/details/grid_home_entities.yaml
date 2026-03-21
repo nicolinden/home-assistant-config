@@ -1,0 +1,8 @@
+type: entities
+title: 🏠 Net & Huis (P1 / helpers)
+show_header_toggle: false
+entities:
+  - entity: sensor.grid_power
+    name: Net (netto)
+  - entity: sensor.home_power
+    name: Huisverbruik

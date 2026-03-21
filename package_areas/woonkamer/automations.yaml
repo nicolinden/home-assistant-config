@@ -1,0 +1,99 @@
+- id: homepod_push_woonkamer_pulse_5min
+  alias: "HomePod push - Woonkamer (pulse elke 5 min)"
+  description: "Puls de HomePod trigger-switch zodat HomeKit automation kan draaien"
+  mode: single
+  trigger:
+    - platform: time_pattern
+      minutes: "/5"
+  condition: []
+  action:
+    - service: input_boolean.turn_on
+      target:
+        entity_id: input_boolean.homepod_push_woonkamer
+
+    - delay: "00:00:01"
+
+    - service: input_boolean.turn_off
+      target:
+        entity_id: input_boolean.homepod_push_woonkamer
+
+# Als de HDMI dropdown verandert, voer dan ook echt de bronwissel uit
+- alias: Woonkamer - HDMI dropdown gewijzigd
+  id: woonkamer_tv_hdmi_dropdown_gewijzigd
+  mode: restart
+  trigger:
+    - platform: state
+      entity_id: input_select.woonkamer_tv_channel
+  condition:
+    - condition: template
+      value_template: >
+        {{ trigger.to_state.state in ['Apple TV', 'Nintendo', 'Ziggo', 'Sonos'] }}
+  action:
+    - choose:
+        - conditions:
+            - condition: state
+              entity_id: input_select.woonkamer_tv_channel
+              state: "Apple TV"
+          sequence:
+            - service: script.woonkamer_tv_set_channel_apple_tv
+
+        - conditions:
+            - condition: state
+              entity_id: input_select.woonkamer_tv_channel
+              state: "Nintendo"
+          sequence:
+            - service: script.woonkamer_tv_set_channel_nintendo
+
+        - conditions:
+            - condition: state
+              entity_id: input_select.woonkamer_tv_channel
+              state: "Ziggo"
+          sequence:
+            - service: script.woonkamer_tv_set_channel_ziggo
+
+        - conditions:
+            - condition: state
+              entity_id: input_select.woonkamer_tv_channel
+              state: "Sonos"
+          sequence:
+            - service: script.woonkamer_tv_set_channel_sonos
+
+# Als app in dropdown verandert terwijl Apple TV als HDMI-kanaal gekozen is,
+# open dan die app op de Apple TV
+- alias: Woonkamer - Apple TV app geselecteerd
+  id: woonkamer_appletv_app_geselecteerd
+  mode: restart
+  trigger:
+    - platform: state
+      entity_id: input_select.woonkamer_appletv_app
+  condition:
+    - condition: state
+      entity_id: input_select.woonkamer_tv_channel
+      state: "Apple TV"
+    - condition: template
+      value_template: >
+        {{ trigger.to_state.state not in ['unknown', 'unavailable', 'none'] }}
+  action:
+    - service: media_player.select_source
+      target:
+        entity_id: media_player.woonkamer_tv
+      data:
+        source: "{{ trigger.to_state.state }}"
+
+# Als het scherm uit gaat, zet de UI terug op "Uit"
+- alias: Woonkamer - TV uit => kanaal Uit
+  id: woonkamer_tv_uit_kanaal_uit
+  mode: single
+  trigger:
+    - platform: state
+      entity_id: binary_sensor.woonkamer_tv_on
+      to: "off"
+    - platform: state
+      entity_id: switch.55oled705_12_screen_state
+      to: "unavailable"
+  action:
+    - service: input_select.select_option
+      target:
+        entity_id: input_select.woonkamer_tv_channel
+      data:
+        option: "Apple TV"

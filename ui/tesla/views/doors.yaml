@@ -1,0 +1,5 @@
+title: Deuren & ramen
+path: tesla-doors
+subview: true
+cards:
+  - !include ../cards/doors.yaml

@@ -1,0 +1,120 @@
+# Zet Apple TV aan en schakelt daarna de Philips TV naar HDMI 3
+woonkamer_tv_power_on_apple_tv:
+  alias: Woonkamer - Apple TV aan
+  mode: restart
+  sequence:
+    - service: input_select.select_option
+      target:
+        entity_id: input_select.woonkamer_tv_channel
+      data:
+        option: "Apple TV"
+
+    - service: media_player.turn_on
+      target:
+        entity_id: media_player.woonkamer_tv
+
+    - delay: "00:00:02"
+
+    - choose:
+        - conditions:
+            - condition: state
+              entity_id: binary_sensor.woonkamer_tv_bereikbaar
+              state: "on"
+          sequence:
+            - service: media_player.select_source
+              target:
+                entity_id: media_player.55oled705_12
+              data:
+                source: "HDMI 3"
+
+# Zet de Apple TV uit
+woonkamer_tv_power_off:
+  alias: Woonkamer - TV uit
+  mode: restart
+  sequence:
+    - service: input_select.select_option
+      target:
+        entity_id: input_select.woonkamer_tv_channel
+      data:
+        option: "Apple TV"
+
+    - service: media_player.turn_off
+      target:
+        entity_id: media_player.woonkamer_tv
+
+# Algemene helper om kanaal te kiezen
+woonkamer_tv_set_channel:
+  alias: Woonkamer - TV kanaal kiezen
+  mode: restart
+  fields:
+    channel:
+      description: "Apple TV / Nintendo / Ziggo / Sonos"
+    source:
+      description: "HDMI 1 / HDMI 2 / HDMI 3 / HDMI 4"
+  sequence:
+    - service: input_select.select_option
+      target:
+        entity_id: input_select.woonkamer_tv_channel
+      data:
+        option: "{{ channel }}"
+
+    # Als scherm nog uit is: eerst Apple TV wake sturen
+    - choose:
+        - conditions:
+            - condition: state
+              entity_id: binary_sensor.woonkamer_tv_on
+              state: "off"
+          sequence:
+            - service: media_player.turn_on
+              target:
+                entity_id: media_player.woonkamer_tv
+            - delay: "00:00:02"
+
+    # Daarna HDMI kiezen op de Philips TV
+    - choose:
+        - conditions:
+            - condition: state
+              entity_id: binary_sensor.woonkamer_tv_bereikbaar
+              state: "on"
+          sequence:
+            - service: media_player.select_source
+              target:
+                entity_id: media_player.55oled705_12
+              data:
+                source: "{{ source }}"
+
+woonkamer_tv_set_channel_apple_tv:
+  alias: Woonkamer - Kanaal Apple TV
+  mode: restart
+  sequence:
+    - service: script.woonkamer_tv_set_channel
+      data:
+        channel: "Apple TV"
+        source: "HDMI 3"
+
+woonkamer_tv_set_channel_nintendo:
+  alias: Woonkamer - Kanaal Nintendo
+  mode: restart
+  sequence:
+    - service: script.woonkamer_tv_set_channel
+      data:
+        channel: "Nintendo"
+        source: "HDMI 1"
+
+woonkamer_tv_set_channel_ziggo:
+  alias: Woonkamer - Kanaal Ziggo
+  mode: restart
+  sequence:
+    - service: script.woonkamer_tv_set_channel
+      data:
+        channel: "Ziggo"
+        source: "HDMI 4"
+
+woonkamer_tv_set_channel_sonos:
+  alias: Woonkamer - Kanaal Sonos
+  mode: restart
+  sequence:
+    - service: script.woonkamer_tv_set_channel
+      data:
+        channel: "Sonos"
+        source: "HDMI 2"

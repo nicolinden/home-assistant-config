@@ -1,0 +1,3 @@
+template: !include ../package_areas/wasruimte/templates.yaml
+utility_meter: !include ../package_areas/wasruimte/utility_meters.yaml
+input_number: !include ../package_areas/wasruimte/input_numbers.yaml

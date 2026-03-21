@@ -1,0 +1,6 @@
+- platform: group
+  name: Slaapkamer screens
+  unique_id: screens_bedroom_group
+  entities:
+    - cover.slaapkamer_links
+    - cover.slaapkamer_rechts

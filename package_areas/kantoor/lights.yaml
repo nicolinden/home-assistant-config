@@ -1,0 +1,8 @@
+- platform: group
+  name: Kantoor decor
+  unique_id: office_decor_lights
+  entities:
+    - light.bureau_lightstrip
+    - light.kantoor_dressoir
+    - light.psv_lamp
+    - light.shapes_11a9

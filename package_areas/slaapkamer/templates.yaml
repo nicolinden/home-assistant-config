@@ -1,0 +1,27 @@
+- binary_sensor:
+    - name: slaapkamer_lights_on
+      unique_id: slaapkamer_lights_on
+      state: >
+        {% set ignore = label_entities('dontCountAsLight') | list %}
+        {% set ids = area_entities('slaapkamer')
+            | select('match','^light\\.')
+            | reject('in', ignore)
+            | list %}
+        {{ ids | count > 0 and expand(ids) | selectattr('state','eq','on') | list | count > 0 }}
+
+    - name: "slaapkamer cover open"
+      unique_id: slaapkamer_cover_open
+      state: >
+        {{ state_attr('cover.slaapkamer_screens', 'current_position') | int(0) == 100 }}
+      device_class: opening
+
+- sensor:
+    - name: slaapkamer_lights_on_count
+      unique_id: slaapkamer_lights_on_count
+      state: >
+        {% set ignore = label_entities('dontCountAsLight') | list %}
+        {% set ids = area_entities('slaapkamer')
+            | select('match','^light\\.')
+            | reject('in', ignore)
+            | list %}
+        {{ expand(ids) | selectattr('state','eq','on') | list | count }}

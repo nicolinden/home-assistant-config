@@ -1,0 +1,5 @@
+title: Seat heaters
+path: tesla-seats
+subview: true
+cards:
+  - !include ../cards/seat_heaters.yaml

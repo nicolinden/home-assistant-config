@@ -1,0 +1,4 @@
+automation: !include ../package_areas/hal/automations.yaml
+utility_meter: !include ../package_areas/hal/utility_meters.yaml
+template: !include ../package_areas/hal/templates.yaml
+timer: !include ../package_areas/hal/timers.yaml

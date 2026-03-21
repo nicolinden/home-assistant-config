@@ -1,0 +1,5 @@
+automation: !include ../package_areas/house/automations.yaml
+script: !include ../package_areas/house/scripts.yaml
+template: !include ../package_areas/house/templates.yaml
+cover: !include ../package_areas/house/covers.yaml
+input_number: !include ../package_areas/house/input_numbers.yaml

@@ -1,0 +1,4 @@
+light: !include ../package_areas/gamekamer/lights.yaml
+template: !include ../package_areas/gamekamer/templates.yaml
+input_boolean: !include ../package_areas/gamekamer/input_booleans.yaml
+automation: !include ../package_areas/gamekamer/automations.yaml

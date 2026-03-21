@@ -1,0 +1,8 @@
+type: vertical-stack
+view_layout:
+  grid-area: right
+cards:
+  - !include ../flow_graphs/flow.yaml
+  - !include ../flow_graphs/graph_overview.yaml
+  - !include ../flow_graphs/graph_phases.yaml
+  - !include ../flow_graphs/graph_costs_today.yaml

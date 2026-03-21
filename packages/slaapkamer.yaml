@@ -1,0 +1,3 @@
+cover: !include ../package_areas/slaapkamer/covers.yaml
+template: !include ../package_areas/slaapkamer/templates.yaml
+input_datetime: !include ../package_areas/slaapkamer/input_datetimes.yaml

@@ -1,0 +1,11 @@
+type: conditional
+conditions:
+  - entity: device_tracker.k_i_t_t_route
+    state_not: "unknown"
+card:
+  type: tile
+  entity: device_tracker.k_i_t_t_route
+  name: Route
+  icon: mdi:routes
+  tap_action:
+    action: more-info

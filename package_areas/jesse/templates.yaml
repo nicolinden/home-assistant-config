@@ -1,0 +1,102 @@
+- trigger:
+    - platform: event
+      event_type: homepod_slaapkamer_jesse_climate
+  sensor:
+    - name: Slaapkamer Jesse HomePod Temperatuur
+      unique_id: slaapkamer_jesse_homepod_temperature
+      device_class: temperature
+      state_class: measurement
+      unit_of_measurement: "°C"
+      state: >-
+        {{ (trigger.event.data.temperature | string
+            | regex_findall_index('[-+]?[0-9]*[\\.,]?[0-9]+', 0)
+            | replace(',', '.')
+            | float) }}
+
+    - name: Slaapkamer Jesse HomePod Luchtvochtigheid
+      unique_id: slaapkamer_jesse_homepod_humidity
+      device_class: humidity
+      state_class: measurement
+      unit_of_measurement: "%"
+      state: >-
+        {{ (trigger.event.data.humidity | string
+            | replace(',', '.')
+            | float) }}
+
+- switch:
+    - name: "Jesse Game PC"
+      unique_id: jesse_game_pc
+      icon: mdi:desktop-classic
+      # Dit bepaalt de ON/OFF in de UI:
+      state: "{{ is_state('binary_sensor.jesse_pc_online', 'on') }}"
+
+      # AAN = Wake-on-LAN
+      turn_on:
+        service: switch.turn_on
+        target:
+          entity_id: switch.jesse_pc
+
+      # UIT = Shutdown
+      turn_off:
+        service: button.press
+        target:
+          entity_id: button.jesse_game_pc_shutdown
+
+- binary_sensor:
+    - name: "Jesse Game PC Idle"
+      unique_id: jesse_game_pc_idle
+      icon: mdi:motion-sensor-off
+      state: >
+        {% set last = states('sensor.jesse_game_pc_lastactive') %}
+        {% if last in ['unknown','unavailable','none',''] %}
+          false
+        {% else %}
+          {{ (as_timestamp(now()) - as_timestamp(last)) > 600 }}
+        {% endif %}
+
+    - name: jesse_lights_on
+      unique_id: jesse_lights_on
+      state: >
+        {% set ignore = label_entities('dontCountAsLight') | list %}
+        {% set ids = area_entities('slaapkamer_jesse')
+          | select('match','^light\\.')
+          | reject('in', ignore)
+          | list %}
+        {{ ids | count > 0 and (expand(ids) | selectattr('state','eq','on') | list | count > 0) }}
+
+- sensor:
+    - name: "Jesse Game PC Status"
+      unique_id: jesse_game_pc_status
+      state: >
+        {% if is_state('binary_sensor.jesse_pc_online', 'off') %}
+          Offline
+        {% else %}
+          {% set last = states('sensor.jesse_game_pc_lastactive') %}
+          {% if last in ['unknown','unavailable','none',''] %}
+            Idle
+          {% else %}
+            {% set idle = (as_timestamp(now()) - as_timestamp(last)) > 600 %}
+            {{ 'Idle' if idle else 'Actief' }}
+          {% endif %}
+        {% endif %}
+
+    - name: "Game PC current app"
+      unique_id: jesse_game_pc_current_app
+      state: >
+        {% set s = states('sensor.jesse_game_pc_activewindow') %}
+        {% if s|length > 12 %}
+          {{ s[:12] ~ '…' }}
+        {% else %}
+          {{ s }}
+        {% endif %}
+
+    - name: jesse_lights_on_count
+      unique_id: jesse_lights_on_count
+      icon: mdi:lightbulb
+      state: >
+        {% set ignore = label_entities('dontCountAsLight') | list %}
+        {% set ids = area_entities('slaapkamer_jesse')
+          | select('match','^light\\.')
+          | reject('in', ignore)
+          | list %}
+        {{ expand(ids) | selectattr('state','eq','on') | list | count }}

@@ -1,0 +1,35 @@
+energy_import_t1_eur_kwh:
+  name: Import tarief T1 (€/kWh)
+  min: 0
+  max: 1
+  step: 0.00001
+  unit_of_measurement: "€/kWh"
+  icon: mdi:currency-eur
+  initial: 0.25399
+
+energy_import_t2_eur_kwh:
+  name: Import tarief T2 (€/kWh)
+  min: 0
+  max: 1
+  step: 0.00001
+  unit_of_measurement: "€/kWh"
+  icon: mdi:currency-eur
+  initial: 0.25641
+
+energy_export_t1_eur_kwh:
+  name: Export tarief T1 (€/kWh)
+  min: 0
+  max: 1
+  step: 0.00001
+  unit_of_measurement: "€/kWh"
+  icon: mdi:currency-eur
+  initial: 0.150
+
+energy_export_t2_eur_kwh:
+  name: Export tarief T2 (€/kWh)
+  min: 0
+  max: 1
+  step: 0.00001
+  unit_of_measurement: "€/kWh"
+  icon: mdi:currency-eur
+  initial: 0.150

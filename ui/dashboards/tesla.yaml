@@ -1,0 +1,6 @@
+tesla-modular:
+  mode: yaml
+  title: Tesla Modular
+  icon: mdi:car
+  show_in_sidebar: true
+  filename: ui/tesla/dashboard.yaml

@@ -1,0 +1,161 @@
+- binary_sensor:
+    - name: wasruimte_lights_on
+      unique_id: wasruimte_lights_on
+      state: >
+        {% set ignore = label_entities('dontCountAsLight') | list %}
+        {% set ids = area_entities('wasruimte')
+          | select('match','^light\\.')
+          | reject('in', ignore)
+          | list %}
+        {{ ids | count > 0 and (expand(ids) | selectattr('state','eq','on') | list | count > 0) }}
+
+    - name: "Droger Aan"
+      unique_id: droger_aan
+      state: >
+        {{ states('sensor.sonoff_s60zbtpf_power_2') | float(0) > 20 }}
+      delay_off:
+        minutes: 2
+
+    - name: "Wasmachine Aan"
+      unique_id: wasmachine_aan
+      state: >
+        {{ states('sensor.sonoff_s60zbtpf_power') | float(0) > 10 }}
+      delay_off:
+        minutes: 2
+
+- sensor:
+    - name: wasruimte_lights_on_count
+      unique_id: wasruimte_lights_on_count
+      icon: mdi:lightbulb
+      state: >
+        {% set ignore = label_entities('dontCountAsLight') | list %}
+        {% set ids = area_entities('wasruimte')
+          | select('match','^light\\.')
+          | reject('in', ignore)
+          | list %}
+        {{ expand(ids) | selectattr('state','eq','on') | list | count }}
+
+# =====================================
+# = SENSORS for LIVE Energy dashboard =
+# =====================================
+
+    - name: Home Power
+      unique_id: sensor_home_power
+      unit_of_measurement: "W"
+      device_class: power
+      state_class: measurement
+      state: >
+        {{ (
+            states('sensor.goodwe_pv_power') | float(0)
+            + states('sensor.p1_meter_power') | float(0)
+          ) | round(0) }}
+
+    - name: Grid Power
+      unique_id: sensor_grid_power
+      unit_of_measurement: "W"
+      device_class: power
+      state_class: measurement
+      state: >
+        {{ states('sensor.p1_meter_power') | float(0) | round(0) }}
+
+    # =========================
+    # IMPORT KOSTEN (totaal)
+    # =========================
+    - name: Energy Import Cost T1
+      unique_id: energy_import_cost_t1
+      unit_of_measurement: "€"
+      device_class: monetary
+      state_class: total_increasing
+      state: >
+        {{ (states('sensor.p1_meter_energy_import_tariff_1')|float(0)
+            * states('input_number.energy_import_t1_eur_kwh')|float(0)) | round(2) }}
+
+    - name: Energy Import Cost T2
+      unique_id: energy_import_cost_t2
+      unit_of_measurement: "€"
+      device_class: monetary
+      state_class: total_increasing
+      state: >
+        {{ (states('sensor.p1_meter_energy_import_tariff_2')|float(0)
+            * states('input_number.energy_import_t2_eur_kwh')|float(0)) | round(2) }}
+
+    - name: Energy Import Total Cost
+      unique_id: energy_import_total_cost
+      unit_of_measurement: "€"
+      device_class: monetary
+      state_class: total_increasing
+      state: >
+        {{ (states('sensor.energy_import_cost_t1')|float(0)
+            + states('sensor.energy_import_cost_t2')|float(0)) | round(2) }}
+
+    # =========================
+    # EXPORT OPBRENGST (totaal)
+    # =========================
+    - name: Energy Export Revenue T1
+      unique_id: energy_export_revenue_t1
+      unit_of_measurement: "€"
+      device_class: monetary
+      state_class: total_increasing
+      state: >
+        {{ (states('sensor.p1_meter_energy_export_tariff_1')|float(0)
+            * states('input_number.energy_export_t1_eur_kwh')|float(0)) | round(2) }}
+
+    - name: Energy Export Revenue T2
+      unique_id: energy_export_revenue_t2
+      unit_of_measurement: "€"
+      device_class: monetary
+      state_class: total_increasing
+      state: >
+        {{ (states('sensor.p1_meter_energy_export_tariff_2')|float(0)
+            * states('input_number.energy_export_t2_eur_kwh')|float(0)) | round(2) }}
+
+    - name: Energy Export Total Revenue
+      unique_id: energy_export_total_revenue
+      unit_of_measurement: "€"
+      device_class: monetary
+      state_class: total_increasing
+      state: >
+        {{ (states('sensor.energy_export_revenue_t1')|float(0)
+            + states('sensor.energy_export_revenue_t2')|float(0)) | round(2) }}
+
+    # =========================
+    # NETTO (kan + / - worden)
+    # =========================
+    - name: Energy Net Result
+      unique_id: energy_net_result_total
+      unit_of_measurement: "€"
+      device_class: monetary
+      state_class: measurement
+      state: >
+        {{ (states('sensor.energy_export_total_revenue')|float(0)
+            - states('sensor.energy_import_total_cost')|float(0)) | round(2) }}
+
+    # =========================
+    # VANDAAG (op basis van utility_meter)
+    # =========================
+    - name: Energy Import Cost Today
+      unique_id: energy_import_cost_today
+      unit_of_measurement: "€"
+      device_class: monetary
+      state_class: total
+      state: >
+        {{ ((states('sensor.p1_import_t1_day')|float(0) * states('input_number.energy_import_t1_eur_kwh')|float(0))
+            + (states('sensor.p1_import_t2_day')|float(0) * states('input_number.energy_import_t2_eur_kwh')|float(0))) | round(2) }}
+
+    - name: Energy Export Revenue Today
+      unique_id: energy_export_revenue_today
+      unit_of_measurement: "€"
+      device_class: monetary
+      state_class: total
+      state: >
+        {{ ((states('sensor.p1_export_t1_day')|float(0) * states('input_number.energy_export_t1_eur_kwh')|float(0))
+            + (states('sensor.p1_export_t2_day')|float(0) * states('input_number.energy_export_t2_eur_kwh')|float(0))) | round(2) }}
+
+    - name: Energy Net Result Today
+      unique_id: energy_net_result_today
+      unit_of_measurement: "€"
+      device_class: monetary
+      state_class: measurement
+      state: >
+        {{ (states('sensor.energy_export_revenue_today')|float(0)
+            - states('sensor.energy_import_cost_today')|float(0)) | round(2) }}

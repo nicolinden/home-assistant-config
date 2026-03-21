@@ -1,0 +1,59 @@
+type: vertical-stack
+cards:
+  # ===== Climate master toggle =====
+  - type: tile
+    entity: climate.k_i_t_t_climate
+    name: Climate
+    icon: mdi:fan
+    tap_action:
+      action: toggle
+    features:
+      - type: climate-hvac-modes
+
+  # ===== Steering wheel auto heater =====
+  # ===== Steering wheel combined card =====
+  - type: horizontal-stack
+    cards:
+      - type: tile
+        entity: switch.k_i_t_t_auto_steering_wheel_heater
+        name: Auto stuur
+        icon: mdi:steering
+        tap_action:
+          action: toggle
+
+      - type: tile
+        entity: select.k_i_t_t_steering_wheel_heater
+        name: Stand
+        icon: mdi:car-seat-heater
+  # ===== Seats grid =====
+  - type: grid
+    columns: 2
+    square: false
+    cards:
+      - type: entities
+        title: Voor links
+        entities:
+          - entity: select.k_i_t_t_seat_heater_front_left
+            name: Stand
+            icon: mdi:car-seat-heater
+
+      - type: entities
+        title: Voor rechts
+        entities:
+          - entity: select.k_i_t_t_seat_heater_front_right
+            name: Stand
+            icon: mdi:car-seat-heater
+
+      - type: entities
+        title: Achter links
+        entities:
+          - entity: select.k_i_t_t_seat_heater_rear_left
+            name: Stand
+            icon: mdi:car-seat-heater
+
+      - type: entities
+        title: Achter rechts
+        entities:
+          - entity: select.k_i_t_t_seat_heater_rear_right
+            name: Stand
+            icon: mdi:car-seat-heater

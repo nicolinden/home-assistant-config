@@ -1,0 +1,2 @@
+automation: !include ../package_areas/garage/automations.yaml
+template: !include ../package_areas/garage/templates.yaml

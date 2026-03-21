@@ -1,0 +1,13 @@
+type: conditional
+conditions:
+  - entity: sensor.goodwe_pv_power
+    state_not: "unavailable"
+  - entity: sensor.goodwe_pv_power
+    state_not: "unknown"
+card:
+  type: gauge
+  name: Zonnepanelen (nu)
+  entity: sensor.goodwe_pv_power
+  unit: W
+  min: 0
+  max: 6000

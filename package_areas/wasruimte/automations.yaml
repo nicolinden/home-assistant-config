@@ -1,0 +1,19 @@
+# - id: droger_beveiliging_tegen_uitschakelen
+#   alias: Droger beveiliging tegen uitschakelen
+#   mode: restart
+#   trigger:
+#     - platform: state
+#       entity_id: switch.ikea_of_sweden_inspelning_smart_plug
+#       to: "off"
+#   condition:
+#     - condition: numeric_state
+#       entity_id: sensor.ikea_of_sweden_inspelning_smart_plug_power
+#       above: 10
+#   action:
+#     - service: switch.turn_on
+#       target:
+#         entity_id: switch.ikea_of_sweden_inspelning_smart_plug
+#     - service: persistent_notification.create
+#       data:
+#         title: Droger beveiliging
+#         message: "Droger draait nog. Uitschakelen geblokkeerd."

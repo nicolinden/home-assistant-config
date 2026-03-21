@@ -1,0 +1,38 @@
+- sensor:
+    - name: "Buitentemperatuur Slim"
+      unique_id: buitentemperatuur_slim
+      device_class: temperature
+      state_class: measurement
+      unit_of_measurement: "°C"
+      state: >-
+        {% set tesla_home = is_state('device_tracker.tesla_location', 'home') %}
+        {% set tesla_temp = states('sensor.k_i_t_t_outside_temperature') %}
+        {% set metno_temp = state_attr('weather.forecast_home', 'temperature') %}
+
+        {% if tesla_home and tesla_temp not in ['unknown','unavailable','none',''] %}
+          {{ tesla_temp | float }}
+        {% else %}
+          {{ metno_temp | float(0) }}
+        {% endif %}
+
+    - name: tuin_lights_on_count
+      unique_id: tuin_lights_on_count
+      icon: mdi:lightbulb
+      state: >
+        {% set ignore = label_entities('dontCountAsLight') | list %}
+        {% set ids = area_entities('tuin')
+          | select('match','^light\\.')
+          | reject('in', ignore)
+          | list %}
+        {{ expand(ids) | selectattr('state','eq','on') | list | count }}
+
+- binary_sensor:
+    - name: tuin_lights_on
+      unique_id: tuin_lights_on
+      state: >
+        {% set ignore = label_entities('dontCountAsLight') | list %}
+        {% set ids = area_entities('tuin')
+          | select('match','^light\\.')
+          | reject('in', ignore)
+          | list %}
+        {{ ids | count > 0 and (expand(ids) | selectattr('state','eq','on') | list | count > 0) }}

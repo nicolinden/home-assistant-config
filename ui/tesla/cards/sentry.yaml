@@ -1,0 +1,13 @@
+type: custom:mushroom-template-card
+entity: switch.k_i_t_t_sentry_mode
+primary: Sentry
+secondary: >
+  {% if is_state(entity,'on') %} Aan {% else %} Uit {% endif %}
+icon: mdi:cctv
+icon_color: >
+  {% if is_state(entity,'on') %} green {% else %} grey {% endif %}
+layout: horizontal
+tap_action:
+  action: toggle
+hold_action:
+  action: more-info

@@ -1,0 +1,19 @@
+woonkamer_tv_channel:
+  name: Woonkamer TV kanaal
+  options:
+    - Apple TV
+    - Nintendo
+    - Ziggo
+    - Sonos
+  initial: Apple TV
+
+woonkamer_appletv_app:
+  name: Woonkamer Apple TV app
+  options:
+    - TV
+    - F1 TV
+    - Netflix
+    - SkyShowtime
+    - YouTube
+    - Ziggo GO TV
+  initial: TV

@@ -1,0 +1,159 @@
+type: vertical-stack
+cards:
+  # ===== Compacte climate kaart (met Actief/Uit) =====
+  - type: custom:mushroom-template-card
+    entity: climate.k_i_t_t_climate
+    primary: Klimaat
+
+    secondary: >
+      {% set hvac = states('climate.k_i_t_t_climate') %}
+      {% if hvac in ['heat', 'cool', 'heat_cool'] %}
+      • Binnen: {{ state_attr('climate.k_i_t_t_climate','current_temperature') | default('?') }}°C
+      {% else %}
+      • Binnen: {{ state_attr('climate.k_i_t_t_climate','current_temperature') | default('?') }}°C
+      {% endif %}
+      • Buiten: {{ states('sensor.k_i_t_t_outside_temperature') | default('?') }}°C
+
+    icon: >
+      {% set hvac = states('climate.k_i_t_t_climate') %}
+      {% if hvac in ['heat', 'cool', 'heat_cool'] %}
+        mdi:car-defrost-front
+      {% else %}
+        mdi:car-off
+      {% endif %}
+
+    icon_color: >
+      {% set hvac = states('climate.k_i_t_t_climate') %}
+      {% if hvac in ['heat', 'cool', 'heat_cool'] %}
+        amber
+      {% else %}
+        grey
+      {% endif %}
+
+    multiline_secondary: true
+    tap_action:
+      action: more-info
+    hold_action:
+      action: more-info
+
+  # ===== Knoppen onder climate =====
+  - type: grid
+    columns: 4
+    square: false
+    cards:
+
+    # ===== SEATS =====
+    - type: custom:mushroom-template-card
+      primary: ""
+      icon: mdi:car-seat-heater
+      layout: vertical
+      icon_color: >
+        {% set fl = states('select.k_i_t_t_seat_heater_front_left') %}
+        {% set fr = states('select.k_i_t_t_seat_heater_front_right') %}
+        {% set rl = states('select.k_i_t_t_seat_heater_rear_left') %}
+        {% set rr = states('select.k_i_t_t_seat_heater_rear_right') %}
+        {% set sw = states('select.k_i_t_t_steering_wheel_heater') %}
+        {% set any_on =
+          fl not in ['off','unknown','unavailable','none',''] or
+          fr not in ['off','unknown','unavailable','none',''] or
+          rl not in ['off','unknown','unavailable','none',''] or
+          rr not in ['off','unknown','unavailable','none',''] or
+          sw not in ['off','unknown','unavailable','none','']
+        %}
+        {% if any_on %} red {% else %} grey {% endif %}
+      tap_action:
+        action: navigate
+        navigation_path: /tesla-modular/tesla-seats
+      card_mod:
+        style: |
+          ha-card {
+            display:flex;
+            align-items:center;
+            justify-content:center;
+          }
+
+    # ===== OVERHEAT =====
+    - type: custom:mushroom-template-card
+      primary: ""
+      icon: mdi:thermometer-alert
+      layout: vertical
+      icon_color: >
+        {% if is_state('switch.k_i_t_t_cabin_overheat_protection','on') %}
+          orange
+        {% else %}
+          grey
+        {% endif %}
+      tap_action:
+        action: navigate
+        navigation_path: /tesla-modular/tesla-overheat
+      card_mod:
+        style: |
+          ha-card {
+            display:flex;
+            align-items:center;
+            justify-content:center;
+          }
+
+    # ===== DOORS =====
+    - type: custom:mushroom-template-card
+      primary: ""
+      icon: mdi:car-door
+      layout: vertical
+      icon_color: >
+        {% set sensors = [
+          'binary_sensor.k_i_t_t_front_driver_door',
+          'binary_sensor.k_i_t_t_front_passenger_door',
+          'binary_sensor.k_i_t_t_rear_driver_door',
+          'binary_sensor.k_i_t_t_rear_passenger_door',
+          'binary_sensor.k_i_t_t_front_driver_window',
+          'binary_sensor.k_i_t_t_front_passenger_window',
+          'binary_sensor.k_i_t_t_rear_driver_window',
+          'binary_sensor.k_i_t_t_rear_passenger_window'
+        ] %}
+        {% set open_any = false %}
+        {% for s in sensors %}
+          {% if is_state(s,'on') %}
+            {% set open_any = true %}
+          {% endif %}
+        {% endfor %}
+        {% if open_any %} red {% else %} grey {% endif %}
+      tap_action:
+        action: navigate
+        navigation_path: /tesla-modular/tesla-doors
+      card_mod:
+        style: |
+          ha-card {
+            display:flex;
+            align-items:center;
+            justify-content:center;
+          }
+
+    # ===== TIRES =====
+    - type: custom:mushroom-template-card
+      primary: ""
+      icon: mdi:tire
+      layout: vertical
+      icon_color: >
+        {% set warn = [
+          'binary_sensor.k_i_t_t_tire_pressure_warning_front_left',
+          'binary_sensor.k_i_t_t_tire_pressure_warning_front_right',
+          'binary_sensor.k_i_t_t_tire_pressure_warning_rear_left',
+          'binary_sensor.k_i_t_t_tire_pressure_warning_rear_right'
+        ] %}
+        {% set bad = false %}
+        {% for s in warn %}
+          {% if is_state(s,'on') %}
+            {% set bad = true %}
+          {% endif %}
+        {% endfor %}
+        {% if bad %} red {% else %} grey {% endif %}
+      tap_action:
+        action: navigate
+        navigation_path: /tesla-modular/tesla-tires
+      card_mod:
+        style: |
+          ha-card {
+            display:flex;
+            align-items:center;
+            justify-content:center;
+          }

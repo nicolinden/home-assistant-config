@@ -1,0 +1,12 @@
+title: Tesla test
+path: tesla-test
+cards:
+  - type: vertical-stack
+    cards:
+      - !include ../cards/header_chips.yaml
+      - !include ../cards/update_banner.yaml
+      - !include ../cards/car_image.yaml
+      - !include ../cards/sentry.yaml      
+      - !include ../cards/actions.yaml
+      - !include ../cards/climate.yaml
+      - !include ../cards/route.yaml

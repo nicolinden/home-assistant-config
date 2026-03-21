@@ -1,0 +1,33 @@
+stuur_bericht_naar_jesse_pc:
+  alias: Stuur bericht naar Jesse PC
+  mode: single
+  fields:
+    bericht:
+      name: Bericht
+      description: Bericht dat direct meegegeven wordt via API/shortcut
+      selector:
+        text:
+  sequence:
+    - variables:
+        final_bericht: >
+          {% set direct = bericht | default('') | trim %}
+          {% set helper = states('input_text.jesse_pc_bericht') | trim %}
+          {{ direct if direct != '' else helper }}
+
+    - condition: template
+      value_template: "{{ final_bericht != '' }}"
+
+    - action: notify.jesse_game_pc
+      data:
+        title: Home Assistant
+        message: "{{ final_bericht }}"
+
+    - if:
+        - condition: template
+          value_template: "{{ states('input_text.jesse_pc_bericht') | trim != '' }}"
+      then:
+        - action: input_text.set_value
+          target:
+            entity_id: input_text.jesse_pc_bericht
+          data:
+            value: ""

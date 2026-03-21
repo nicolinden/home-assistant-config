@@ -1,0 +1,306 @@
+- id: homepod_push_kantoor_pulse_5min
+  alias: "HomePod push - Kantoor (pulse elke 5 min)"
+  mode: single
+  trigger:
+    - platform: time_pattern
+      minutes: "/5"
+  condition: []
+  action:
+    - service: input_boolean.turn_on
+      target:
+        entity_id: input_boolean.homepod_push_kantoor
+    - delay: "00:00:01"
+    - service: input_boolean.turn_off
+      target:
+        entity_id: input_boolean.homepod_push_kantoor
+
+###############################################################################
+# KANTOOR - Gira Friends of Hue (Hue Bridge) automations
+# Event flow: initial_press -> repeat... -> long_release (soms ook short_release)
+#
+# Vereist input_booleans:
+# - input_boolean.kantoor_dim_plafond_up
+# - input_boolean.kantoor_dim_plafond_down
+# - input_boolean.kantoor_dim_decor_up
+# - input_boolean.kantoor_dim_decor_down
+###############################################################################
+
+# --- Button 1 short: plafond aan (alleen als we NIET aan het dimmen zijn)
+- alias: Kantoor schakelaar - Btn1 short - Plafond aan
+  mode: single
+  trigger:
+    - platform: state
+      entity_id: event.kantoor_schakelaar_button_1
+  condition:
+    - condition: template
+      value_template: "{{ trigger.to_state.attributes.event_type == 'short_release' }}"
+    - condition: state
+      entity_id: input_boolean.kantoor_dim_plafond_up
+      state: "off"
+  action:
+    - service: light.turn_on
+      target:
+        entity_id: light.kantoor_plafond
+
+# --- Button 2 short: plafond uit (alleen als we NIET aan het dimmen zijn)
+- alias: Kantoor schakelaar - Btn2 short - Plafond uit
+  mode: single
+  trigger:
+    - platform: state
+      entity_id: event.kantoor_schakelaar_button_2
+  condition:
+    - condition: template
+      value_template: "{{ trigger.to_state.attributes.event_type == 'short_release' }}"
+    - condition: state
+      entity_id: input_boolean.kantoor_dim_plafond_down
+      state: "off"
+  action:
+    - service: light.turn_off
+      target:
+        entity_id: light.kantoor_plafond
+
+# --- Button 3 short: scene + Nanoleaf (alleen als we NIET aan het dimmen zijn)
+- alias: Kantoor schakelaar - Btn3 short - Sfeer + Neon
+  mode: single
+  trigger:
+    - platform: state
+      entity_id: event.kantoor_schakelaar_button_3
+  condition:
+    - condition: template
+      value_template: "{{ trigger.to_state.attributes.event_type == 'short_release' }}"
+    - condition: state
+      entity_id: input_boolean.kantoor_dim_decor_up
+      state: "off"
+  action:
+    - service: scene.turn_on
+      target:
+        entity_id: scene.kantoor_kantoor_sfeer
+    - service: light.turn_on
+      target:
+        entity_id: light.shapes_11a9
+      data:
+        effect: "Neon"
+
+# --- Button 4 short: decor uit, plafond behouden (alleen als we NIET aan het dimmen zijn)
+- alias: Kantoor schakelaar - Btn4 short - Kantoor uit (plafond behouden)
+  mode: single
+  trigger:
+    - platform: state
+      entity_id: event.kantoor_schakelaar_button_4
+  condition:
+    - condition: template
+      value_template: "{{ trigger.to_state.attributes.event_type == 'short_release' }}"
+    - condition: state
+      entity_id: input_boolean.kantoor_dim_decor_up
+      state: "off"
+    - condition: state
+      entity_id: input_boolean.kantoor_dim_decor_down
+      state: "off"
+  action:
+    - variables:
+        plafond_was_aan: "{{ is_state('light.kantoor_plafond', 'on') }}"
+    - service: light.turn_off
+      target:
+        entity_id: light.kantoor_decor
+    - choose:
+        - conditions:
+            - condition: template
+              value_template: "{{ plafond_was_aan }}"
+          sequence:
+            - service: light.turn_on
+              target:
+                entity_id: light.kantoor_plafond
+
+###############################################################################
+# DIMMEN (Hue Bridge): start op 'repeat' (dus alleen bij echt vasthouden)
+###############################################################################
+
+# --- Btn1 hold: dim plafond omhoog (start bij repeat)
+- alias: Kantoor Btn1 hold - dim plafond omhoog
+  mode: restart
+  trigger:
+    - platform: state
+      entity_id: event.kantoor_schakelaar_button_1
+  condition:
+    - condition: template
+      value_template: "{{ trigger.to_state.attributes.event_type == 'repeat' }}"
+    - condition: state
+      entity_id: input_boolean.kantoor_dim_plafond_up
+      state: "off"
+  action:
+    - service: input_boolean.turn_on
+      target:
+        entity_id: input_boolean.kantoor_dim_plafond_up
+    - repeat:
+        while:
+          - condition: state
+            entity_id: input_boolean.kantoor_dim_plafond_up
+            state: "on"
+        sequence:
+          - service: light.turn_on
+            target:
+              entity_id: light.kantoor_plafond
+            data:
+              brightness: >
+                {% set current = state_attr('light.kantoor_plafond','brightness') | int(1) %}
+                {{ [current + 35, 255] | min }}
+          - delay: 0.10
+
+# --- Btn1 release: stop dim plafond omhoog
+- alias: Kantoor Btn1 release - stop dim plafond omhoog
+  mode: single
+  trigger:
+    - platform: state
+      entity_id: event.kantoor_schakelaar_button_1
+  condition:
+    - condition: template
+      value_template: "{{ trigger.to_state.attributes.event_type in ['short_release','long_release'] }}"
+  action:
+    - service: input_boolean.turn_off
+      target:
+        entity_id: input_boolean.kantoor_dim_plafond_up
+
+# --- Btn2 hold: dim plafond omlaag (start bij repeat)
+- alias: Kantoor Btn2 hold - dim plafond omlaag
+  mode: restart
+  trigger:
+    - platform: state
+      entity_id: event.kantoor_schakelaar_button_2
+  condition:
+    - condition: template
+      value_template: "{{ trigger.to_state.attributes.event_type == 'repeat' }}"
+    - condition: state
+      entity_id: input_boolean.kantoor_dim_plafond_down
+      state: "off"
+  action:
+    - service: input_boolean.turn_on
+      target:
+        entity_id: input_boolean.kantoor_dim_plafond_down
+    - repeat:
+        while:
+          - condition: state
+            entity_id: input_boolean.kantoor_dim_plafond_down
+            state: "on"
+        sequence:
+          - service: light.turn_on
+            target:
+              entity_id: light.kantoor_plafond
+            data:
+              brightness: >
+                {% set current = state_attr('light.kantoor_plafond','brightness') | int(1) %}
+                {{ [current - 35, 1] | max }}
+          - delay: 0.10
+
+# --- Btn2 release: stop dim plafond omlaag
+- alias: Kantoor Btn2 release - stop dim plafond omlaag
+  mode: single
+  trigger:
+    - platform: state
+      entity_id: event.kantoor_schakelaar_button_2
+  condition:
+    - condition: template
+      value_template: "{{ trigger.to_state.attributes.event_type in ['short_release','long_release'] }}"
+  action:
+    - service: input_boolean.turn_off
+      target:
+        entity_id: input_boolean.kantoor_dim_plafond_down
+
+# --- Btn3 hold: dim decor omhoog (start bij repeat) - target dimbare lampen
+- alias: Kantoor Btn3 hold - dim decor omhoog
+  mode: restart
+  trigger:
+    - platform: state
+      entity_id: event.kantoor_schakelaar_button_3
+  condition:
+    - condition: template
+      value_template: "{{ trigger.to_state.attributes.event_type == 'repeat' }}"
+    - condition: state
+      entity_id: input_boolean.kantoor_dim_decor_up
+      state: "off"
+  action:
+    - service: input_boolean.turn_on
+      target:
+        entity_id: input_boolean.kantoor_dim_decor_up
+    - repeat:
+        while:
+          - condition: state
+            entity_id: input_boolean.kantoor_dim_decor_up
+            state: "on"
+        sequence:
+          - variables:
+              ref: "{{ state_attr('light.bureau_lightstrip','brightness') | int(1) }}"
+              next: "{{ [ref + 30, 255] | min }}"
+          - service: light.turn_on
+            target:
+              entity_id:
+                - light.bureau_lightstrip
+                - light.kantoor_dressoir
+                - light.psv_lamp
+                - light.shapes_11a9
+            data:
+              brightness: "{{ next }}"
+          - delay: 0.10
+
+# --- Btn3 release: stop dim decor omhoog
+- alias: Kantoor Btn3 release - stop dim decor omhoog
+  mode: single
+  trigger:
+    - platform: state
+      entity_id: event.kantoor_schakelaar_button_3
+  condition:
+    - condition: template
+      value_template: "{{ trigger.to_state.attributes.event_type in ['short_release','long_release'] }}"
+  action:
+    - service: input_boolean.turn_off
+      target:
+        entity_id: input_boolean.kantoor_dim_decor_up
+
+# --- Btn4 hold: dim decor omlaag (start bij repeat) - target dimbare lampen
+- alias: Kantoor Btn4 hold - dim decor omlaag
+  mode: restart
+  trigger:
+    - platform: state
+      entity_id: event.kantoor_schakelaar_button_4
+  condition:
+    - condition: template
+      value_template: "{{ trigger.to_state.attributes.event_type == 'repeat' }}"
+    - condition: state
+      entity_id: input_boolean.kantoor_dim_decor_down
+      state: "off"
+  action:
+    - service: input_boolean.turn_on
+      target:
+        entity_id: input_boolean.kantoor_dim_decor_down
+    - repeat:
+        while:
+          - condition: state
+            entity_id: input_boolean.kantoor_dim_decor_down
+            state: "on"
+        sequence:
+          - variables:
+              ref: "{{ state_attr('light.bureau_lightstrip','brightness') | int(1) }}"
+              next: "{{ [ref - 30, 1] | max }}"
+          - service: light.turn_on
+            target:
+              entity_id:
+                - light.bureau_lightstrip
+                - light.kantoor_dressoir
+                - light.psv_lamp
+                - light.shapes_11a9
+            data:
+              brightness: "{{ next }}"
+          - delay: 0.10
+
+# --- Btn4 release: stop dim decor omlaag
+- alias: Kantoor Btn4 release - stop dim decor omlaag
+  mode: single
+  trigger:
+    - platform: state
+      entity_id: event.kantoor_schakelaar_button_4
+  condition:
+    - condition: template
+      value_template: "{{ trigger.to_state.attributes.event_type in ['short_release','long_release'] }}"
+  action:
+    - service: input_boolean.turn_off
+      target:
+        entity_id: input_boolean.kantoor_dim_decor_down

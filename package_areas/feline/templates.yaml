@@ -1,0 +1,47 @@
+- trigger:
+    - platform: event
+      event_type: homepod_slaapkamer_feline_climate
+  sensor:
+
+    - name: "Slaapkamer Feline HomePod Temperatuur"
+      unique_id: slaapkamer_feline_homepod_temperature
+      device_class: temperature
+      state_class: measurement
+      unit_of_measurement: "°C"
+      state: >-
+        {{ (trigger.event.data.temperature | string
+            | regex_findall_index('[-+]?[0-9]*[\\.,]?[0-9]+', 0)
+            | replace(',', '.')
+            | float) }}
+
+    - name: "Slaapkamer Feline HomePod Luchtvochtigheid"
+      unique_id: slaapkamer_feline_homepod_humidity
+      device_class: humidity
+      state_class: measurement
+      unit_of_measurement: "%"
+      state: >-
+        {{ (trigger.event.data.humidity | string
+            | replace(',', '.')
+            | float) }}
+
+    - name: feline_lights_on_count
+      unique_id: feline_lights_on_count
+      icon: mdi:lightbulb
+      state: >
+        {% set ignore = label_entities('dontCountAsLight') | list %}
+        {% set ids = area_entities('slaapkamer_feline')
+          | select('match','^light\\.')
+          | reject('in', ignore)
+          | list %}
+        {{ expand(ids) | selectattr('state','eq','on') | list | count }}
+
+- binary_sensor:
+    - name: feline_lights_on
+      unique_id: feline_lights_on
+      state: >
+        {% set ignore = label_entities('dontCountAsLight') | list %}
+        {% set ids = area_entities('slaapkamer_feline')
+          | select('match','^light\\.')
+          | reject('in', ignore)
+          | list %}
+        {{ ids | count > 0 and (expand(ids) | selectattr('state','eq','on') | list | count > 0) }}

@@ -1,0 +1,201 @@
+- alias: Keuken - Parasoll schakelt Tradfri driver
+  id: keuken_parasoll_tradfri_driver
+  mode: restart
+
+  trigger:
+    - platform: state
+      entity_id: binary_sensor.ikea_of_sweden_parasoll_door_window_sensor
+      to: "on"
+      id: contact_open
+
+    - platform: state
+      entity_id: binary_sensor.ikea_of_sweden_parasoll_door_window_sensor
+      to: "off"
+      for: "00:00:15"
+      id: contact_closed
+
+  action:
+    - choose:
+        - conditions:
+            - condition: trigger
+              id: contact_open
+          sequence:
+            - service: light.turn_on
+              target:
+                entity_id: light.ikea_of_sweden_tradfri_driver_10w
+
+        - conditions:
+            - condition: trigger
+              id: contact_closed
+          sequence:
+            - service: light.turn_off
+              target:
+                entity_id: light.ikea_of_sweden_tradfri_driver_10w
+              data:
+                transition: 0
+
+- alias: Keukentafel - ochtend 15%
+  id: keukentafel_ochtend_15
+  mode: single
+
+  trigger:
+    - platform: time
+      at: "06:30:00"
+      id: weekday
+
+    - platform: time
+      at: "07:30:00"
+      id: weekend
+
+  action:
+    - choose:
+        # Doordeweeks 06:30
+        - conditions:
+            - condition: trigger
+              id: weekday
+            - condition: time
+              weekday:
+                - mon
+                - tue
+                - wed
+                - thu
+                - fri
+          sequence:
+            - service: scene.turn_on
+              target:
+                entity_id: scene.keuken_ochtend_15
+              data:
+                transition: 1
+
+        # Weekend 07:30
+        - conditions:
+            - condition: trigger
+              id: weekend
+            - condition: time
+              weekday:
+                - sat
+                - sun
+          sequence:
+            - service: scene.turn_on
+              target:
+                entity_id: scene.keuken_ochtend_15
+              data:
+                transition: 1
+
+- alias: Keuken - bij thuiskomst na zonsondergang
+  id: keuken_bij_thuiskomst_na_zonsondergang
+  mode: single
+
+  trigger:
+    - platform: zone
+      entity_id: person.nico
+      zone: zone.home
+      event: enter
+
+  condition:
+    - condition: sun
+      after: sunset
+
+    - condition: state
+      entity_id: light.keukentafel
+      state: "off"
+
+    - condition: state
+      entity_id: light.keuken_eiland
+      state: "off"
+
+  action:
+    - service: scene.turn_on
+      target:
+        entity_id: scene.keuken_ochtend_15
+      data:
+        transition: 1
+
+- alias: Oven timer minuten naar duur
+  id: oven_timer_minuten_naar_duur
+  mode: restart
+  trigger:
+    - platform: state
+      entity_id: input_number.aeg_oven_timer_minuten
+  action:
+    - service: number.set_value
+      target:
+        entity_id: number.aeg_oven_targetduration
+      data:
+        value: >
+          {{ (states('input_number.aeg_oven_timer_minuten') | float(0) * 60) | round(0) }}
+
+- alias: Oven doeltemperatuur helper naar AEG
+  id: oven_doeltemperatuur_helper_naar_aeg
+  mode: restart
+  trigger:
+    - platform: state
+      entity_id: input_number.aeg_oven_doeltemperatuur
+  action:
+    - service: number.set_value
+      target:
+        entity_id: number.aeg_oven_targettemperaturec
+      data:
+        value: >
+          {{ states('input_number.aeg_oven_doeltemperatuur') | float(30) }}
+
+- alias: Oven doeltemperatuur AEG naar helper
+  id: oven_doeltemperatuur_aeg_naar_helper
+  mode: restart
+  trigger:
+    - platform: state
+      entity_id: number.aeg_oven_targettemperaturec
+  condition:
+    - condition: template
+      value_template: >
+        {{
+          states('number.aeg_oven_targettemperaturec') not in ['unknown', 'unavailable', 'none']
+          and
+          (states('number.aeg_oven_targettemperaturec') | float(0))
+          !=
+          (states('input_number.aeg_oven_doeltemperatuur') | float(0))
+        }}
+  action:
+    - service: input_number.set_value
+      target:
+        entity_id: input_number.aeg_oven_doeltemperatuur
+      data:
+        value: >
+          {{ states('number.aeg_oven_targettemperaturec') | float(30) }}
+
+- id: '1769783829580'
+  alias: Koffie kast sensor - batterij laag
+  description: ''
+  trigger:
+    - platform: time
+      at: "09:00:00"
+  condition:
+    - condition: numeric_state
+      entity_id: sensor.koffie_kast_senor
+      below: 20
+  action:
+    - service: notify.mobile_app_iphone_15_pro_max
+      data:
+        title: "🔋 Batterij bijna leeg"
+        message: "De koffie kast sensor heeft nog {{ states('sensor.koffie_kast_senor') }}% batterij."
+  mode: single
+
+- id: '1769783908320'
+  alias: Koffie deur sensor - 2 dagen geen activiteit
+  description: ''
+  trigger:
+    - platform: time
+      at: "10:00:00"
+  condition:
+    - condition: template
+      value_template: >-
+        {{ (as_timestamp(now()) - as_timestamp(states.binary_sensor.ikea_of_sweden_parasoll_door_window_sensor.last_changed)) > 2*24*3600 }}
+  action:
+    - service: notify.mobile_app_iphone_15_pro_max
+      data:
+        title: ⚠️ Koffie deur sensor stil
+        message: >-
+          De koffie deur sensor heeft al
+          {{ ((as_timestamp(now()) - as_timestamp(states.binary_sensor.ikea_of_sweden_parasoll_door_window_sensor.last_changed)) / 86400) | round(1) }}
+          dagen geen open/close wijziging gestuurd. Mogelijk batterij leeg of sensor offline.
+  mode: single

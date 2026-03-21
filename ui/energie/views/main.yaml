@@ -1,0 +1,31 @@
+- title: Energie Live
+  path: energie-live
+  type: custom:grid-layout
+  layout:
+    grid-gap: 16px
+
+    # default: breed (3 kolommen)
+    grid-template-columns: repeat(3, minmax(0, 1fr))
+    grid-template-areas: |
+      "left middle right"
+
+    mediaquery:
+      # Tussenmaat: EXACT 2 kolommen (geen overlap met 1-kolom)
+      "(min-width: 901px) and (max-width: 1200px)":
+        grid-template-columns: repeat(2, minmax(0, 1fr))
+        grid-template-areas: |
+          "left right"
+          "middle right"
+
+      # Klein: 1 kolom
+      "(max-width: 900px)":
+        grid-template-columns: 1fr
+        grid-template-areas: |
+          "left"
+          "middle"
+          "right"
+
+  cards:
+    - !include ../cards/layout/column_left.yaml
+    - !include ../cards/layout/column_middle.yaml
+    - !include ../cards/layout/column_right.yaml

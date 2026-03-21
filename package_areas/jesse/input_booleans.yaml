@@ -1,0 +1,19 @@
+jesse_dim_main_up:
+  name: Slaapkamer Jesse dim main omhoog
+  icon: mdi:brightness-7
+
+jesse_dim_main_down:
+  name: Slaapkamer Jesse dim main omlaag
+  icon: mdi:brightness-5
+
+jesse_dim_vide_up:
+  name: Slaapkamer Jesse dim vide omhoog
+  icon: mdi:brightness-7
+
+jesse_dim_vide_down:
+  name: Slaapkamer Jesse dim vide omlaag
+  icon: mdi:brightness-5
+
+homepod_push_slaapkamer_jesse:
+  name: Homepod push Jesse
+  icon: mdi:thermometer

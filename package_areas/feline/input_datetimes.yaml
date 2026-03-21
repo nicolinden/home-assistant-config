@@ -1,0 +1,6 @@
+feline_bedtime:
+  name: Feline bedtijd
+  has_date: false
+  has_time: true
+  icon: mdi:sleep
+  initial: "21:00:00"

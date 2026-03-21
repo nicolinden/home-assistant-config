@@ -1,0 +1,15 @@
+- id: homepod_push_slaapkamer_feline_pulse_5min
+  alias: "HomePod push - Slaapkamer Feline (pulse elke 5 min)"
+  mode: single
+  trigger:
+    - platform: time_pattern
+      minutes: "/5"
+  condition: []
+  action:
+    - service: input_boolean.turn_on
+      target:
+        entity_id: input_boolean.homepod_push_slaapkamer_feline
+    - delay: "00:00:01"
+    - service: input_boolean.turn_off
+      target:
+        entity_id: input_boolean.homepod_push_slaapkamer_feline

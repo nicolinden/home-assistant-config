@@ -1,0 +1,8 @@
+gamekamer_work_mode:
+  name: Gamekamer work mode
+  icon: mdi:briefcase
+
+gamekamer_motion_active:
+  name: Gamekamer motion active
+  icon: mdi:motion-sensor
+  initial: false

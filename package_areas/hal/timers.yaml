@@ -1,0 +1,5 @@
+deurbel_weergave:
+  name: Deurbel weergave
+  icon: mdi:alarm-bell
+  duration: "00:00:00"
+  restore: false

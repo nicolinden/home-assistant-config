@@ -1,0 +1,62 @@
+- id: '1770220569199'
+  alias: Tesla status om 21:00
+  description: Stuurt batterijstatus en laadstatus om 21:00
+  trigger:
+    - platform: time
+      at: "21:00:00"
+  action:
+    - service: notify.mobile_app_iphone_15_pro_max
+      data:
+        title: "🚗 Tesla status"
+        message: >-
+          Batterij: {{ states('sensor.k_i_t_t_battery_level') }}%
+          {% if is_state('switch.k_i_t_t_charge', 'on') %}
+            🔌 Hij is aan het laden.
+          {% else %}
+            ❌ Hij is niet aan het laden.
+          {% endif %}
+  mode: single
+
+- id: '1770220613148'
+  alias: Tesla koud waarschuwing om 06:00
+  description: Waarschuwing als het koud is
+  trigger:
+    - platform: time
+      at: "06:00:00"
+  condition:
+    - condition: numeric_state
+      entity_id: sensor.kitt_inside_temperature
+      below: 8
+  action:
+    - service: notify.mobile_app_iphone_15_pro_max
+      data:
+        title: ❄️ Tesla koud
+        message: "Het is {{ states('sensor.kitt_inside_temperature') }}°C in de auto. Denk eraan om hem te verwarmen voordat je vertrekt."
+  mode: single
+
+- id: '1770224905469'
+  alias: K.I.T.T. unlock charge cable (ON)
+  description: Helper ON -> ontgrendel laadkabel
+  trigger:
+    - platform: state
+      entity_id: input_boolean.kitt_unlock_charge_cable
+      to: 'on'
+  action:
+    - service: lock.unlock
+      target:
+        entity_id: lock.k_i_t_t_charge_cable_lock
+  mode: single
+
+- id: '1770224924426'
+  alias: K.I.T.T. unlock charge cable auto-off
+  description: ''
+  trigger:
+    - platform: state
+      entity_id: input_boolean.kitt_unlock_charge_cable
+      to: 'on'
+  action:
+    - delay: "00:00:05"
+    - service: input_boolean.turn_off
+      target:
+        entity_id: input_boolean.kitt_unlock_charge_cable
+  mode: restart

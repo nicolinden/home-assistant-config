@@ -1,0 +1,16 @@
+type: conditional
+conditions:
+  - entity: update.k_i_t_t_update
+    state: "on"
+card:
+  type: custom:mushroom-template-card
+  entity: update.k_i_t_t_update
+  primary: Tesla update beschikbaar
+  secondary: >
+    Huidig: {{ state_attr(entity,'installed_version') }}
+    • Nieuw: {{ state_attr(entity,'latest_version') }}
+  icon: mdi:update
+  icon_color: amber
+  multiline_secondary: true
+  tap_action:
+    action: more-info

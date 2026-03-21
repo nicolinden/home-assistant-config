@@ -1,0 +1,47 @@
+type: vertical-stack
+cards:
+  - type: tile
+    entity: lock.k_i_t_t_lock
+    name: Auto vergrendeling
+    icon: mdi:car-door-lock
+    tap_action:
+      action: more-info
+    features:
+      - type: lock-commands
+
+  - type: grid
+    columns: 2
+    square: false
+    cards:
+      - type: tile
+        entity: cover.k_i_t_t_frunk
+        name: Frunk
+      - type: tile
+        entity: cover.k_i_t_t_trunk
+        name: Trunk
+      - type: tile
+        entity: cover.k_i_t_t_windows
+        name: Windows
+        icon: mdi:car-door
+
+  - type: entities
+    title: Status
+    show_header_toggle: false
+    entities:
+      - entity: binary_sensor.k_i_t_t_front_driver_door
+        name: Deur voor links
+      - entity: binary_sensor.k_i_t_t_front_passenger_door
+        name: Deur voor rechts
+      - entity: binary_sensor.k_i_t_t_rear_driver_door
+        name: Deur achter links
+      - entity: binary_sensor.k_i_t_t_rear_passenger_door
+        name: Deur achter rechts
+
+      - entity: binary_sensor.k_i_t_t_front_driver_window
+        name: Raam voor links
+      - entity: binary_sensor.k_i_t_t_front_passenger_window
+        name: Raam voor rechts
+      - entity: binary_sensor.k_i_t_t_rear_driver_window
+        name: Raam achter links
+      - entity: binary_sensor.k_i_t_t_rear_passenger_window
+        name: Raam achter rechts

@@ -1,0 +1,19 @@
+grid_import_t1_today:
+  source: sensor.p1_meter_energy_import_tariff_1
+  cycle: daily
+
+grid_import_t2_today:
+  source: sensor.p1_meter_energy_import_tariff_2
+  cycle: daily
+
+grid_export_t1_today:
+  source: sensor.p1_meter_energy_export_tariff_1
+  cycle: daily
+
+grid_export_t2_today:
+  source: sensor.p1_meter_energy_export_tariff_2
+  cycle: daily
+
+water_today_raw:
+  source: sensor.watermeter_total_water_usage
+  cycle: daily

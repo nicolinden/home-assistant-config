@@ -1,0 +1,9 @@
+- name: Keuken ochtend 15
+  id: keuken_ochtend_15
+  entities:
+    light.keukentafel:
+      state: "on"
+      brightness: 15
+    light.keuken_eiland:
+      state: "on"
+      brightness: 15

@@ -1,0 +1,13 @@
+type: glance
+title: ⚡ P1 – Vermogen per fase (nu)
+columns: 4
+show_state: true
+entities:
+  - entity: sensor.p1_meter_power
+    name: Totaal
+  - entity: sensor.p1_meter_power_phase_1
+    name: L1
+  - entity: sensor.p1_meter_power_phase_2
+    name: L2
+  - entity: sensor.p1_meter_power_phase_3
+    name: L3

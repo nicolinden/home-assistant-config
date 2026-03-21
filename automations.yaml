@@ -1,0 +1,531 @@
+- id: '1769780332692'
+  alias: Frituurpan - waarschuwing elke 30 min zolang aan
+  description: ''
+  triggers:
+  - type: turned_on
+    device_id: 02ba68de1ec08109dbddb0e6b948c6aa
+    entity_id: b24fe08e85ad9728f34fa5c531e4d9ae
+    domain: switch
+    trigger: device
+  actions:
+  - delay: 00:02:00
+  - repeat:
+      while:
+      - condition: state
+        entity_id: b24fe08e85ad9728f34fa5c531e4d9ae
+        state: 'on'
+      sequence:
+      - data:
+          title: ⚠️ Frituurpan staat AAN
+          message: De frituurpan is nog aan. Controleer of dit de bedoeling is en
+            zet hem uit indien nodig.
+          data:
+            interruption-level: time-sensitive
+        action: notify.mobile_app_iphone_15_pro_max
+      - delay: 00:30:00
+  mode: restart
+- id: '1769780362983'
+  alias: Frituurpan - auto uit na 1 uur
+  description: ''
+  triggers:
+  - entity_id: b24fe08e85ad9728f34fa5c531e4d9ae
+    to: 'on'
+    for: 01:00:00
+    trigger: state
+  actions:
+  - target:
+      entity_id: b24fe08e85ad9728f34fa5c531e4d9ae
+    action: switch.turn_off
+  - data:
+      title: ✅ Frituurpan automatisch uitgezet
+      message: De frituurpan stond 1 uur aan en is automatisch uitgezet.
+      data:
+        interruption-level: time-sensitive
+    action: notify.mobile_app_iphone_15_pro_max
+  mode: single
+- id: '1769780578162'
+  alias: Frituurpan - melding aan/uit met tijd en duur
+  description: ''
+  triggers:
+  - entity_id: b24fe08e85ad9728f34fa5c531e4d9ae
+    to:
+    - 'on'
+    - 'off'
+    trigger: state
+  actions:
+  - choose:
+    - conditions:
+      - condition: template
+        value_template: '{{ trigger.to_state.state == ''on'' }}'
+      sequence:
+      - data:
+          title: "\U0001F35F Frituurpan AAN"
+          message: 'Aangezet om {{ now().strftime(''%H:%M'') }}.
+
+            '
+        action: notify.mobile_app_iphone_15_pro_max
+    - conditions:
+      - condition: template
+        value_template: '{{ trigger.to_state.state == ''off'' and trigger.from_state.state
+          == ''on'' }}'
+      sequence:
+      - variables:
+          started_ts: '{{ as_timestamp(trigger.from_state.last_changed) }}'
+          duration_sec: '{{ as_timestamp(now()) - started_ts }}'
+          duration_min: '{{ (duration_sec / 60) | round(0) }}'
+          started_time: '{{ trigger.from_state.last_changed.astimezone().strftime(''%H:%M'')
+            }}'
+      - data:
+          title: ✅ Frituurpan UIT
+          message: 'Uitgezet om {{ now().strftime(''%H:%M'') }}. Stond aan sinds {{
+            started_time }} ({{ duration_min }} min).
+
+            '
+        action: notify.mobile_app_iphone_15_pro_max
+    default: []
+  mode: single
+- id: '1769783829580'
+  alias: Koffie kast sensor - batterij laag
+  description: ''
+  triggers:
+  - at: 09:00:00
+    trigger: time
+  conditions:
+  - condition: numeric_state
+    entity_id: sensor.koffie_kast_senor
+    below: 20
+  actions:
+  - data:
+      title: "\U0001F50B Batterij bijna leeg"
+      message: 'De koffie kast sensor heeft nog {{ states(''sensor.koffie_kast_senor'')
+        }}% batterij.
+
+        '
+    action: notify.mobile_app_iphone_15_pro_max
+  mode: single
+- id: '1769783908320'
+  alias: Koffie deur sensor - 2 dagen geen activiteit
+  description: ''
+  triggers:
+  - at: '10:00:00'
+    trigger: time
+  conditions:
+  - condition: template
+    value_template: '{{ (as_timestamp(now()) - as_timestamp(states.binary_sensor.ikea_of_sweden_parasoll_door_window_sensor.last_changed))
+      > 2*24*3600 }}
+
+      '
+  actions:
+  - data:
+      title: ⚠️ Koffie deur sensor stil
+      message: 'De koffie deur sensor heeft al {{ ((as_timestamp(now()) - as_timestamp(states.binary_sensor.ikea_of_sweden_parasoll_door_window_sensor.last_changed))
+        / 86400) | round(1) }} dagen geen open/close wijziging gestuurd. Mogelijk
+        batterij leeg of sensor offline.
+
+        '
+    action: notify.mobile_app_iphone_15_pro_max
+  mode: single
+- id: screens_open_when_bad_weather
+  alias: 'Screens: open doen bij slecht weer (10-20, elke 30 min)'
+  description: ''
+  triggers:
+  - minutes: /30
+    trigger: time_pattern
+  conditions:
+  - condition: time
+    after: '10:00:00'
+    before: '20:00:00'
+  actions:
+  - condition: template
+    value_template: '{{ bad_weather and (closed_covers | length > 0) }}'
+  - data:
+      title: Screens OPEN doen (slecht weer)
+      message: 'Reden: {{ reasons | join('', '') }}
+
+        Nog DICHT: {% for c in closed_covers %} - {{ state_attr(c,''friendly_name'')
+        or c }} ({{ states(c) }}) {% endfor %}
+
+        Weer (current): - Conditie: {{ w_state }} - Temp: {{ w_temp }}°C - Wind: {{
+        w_wind }} km/h - Luchtvochtigheid: {{ w_hum }}%
+
+        {% if fc_cond is not none or fc_temp is not none or fc_precip is not none
+        %} Verwachting (volgende forecast): {% if fc_cond is not none %}- Conditie:
+        {{ fc_cond }}{% endif %} {% if fc_temp is not none %}- Temp: {{ fc_temp }}°C{%
+        endif %} {% if fc_precip is not none %}- Neerslag: {{ fc_precip }}{% endif
+        %} {% endif %}'
+      data:
+        tag: screens_open_bad_weather
+        notification_icon: mdi:blinds-open
+        priority: high
+    action: notify.mobile_app_iphone_15_pro_max
+  mode: single
+  variables:
+    weather_entity: weather.home
+    covers:
+    - cover.feline
+    - cover.jesse
+    - cover.kantoor_voor
+    - cover.kantoor_zij
+    - cover.keuken
+    - cover.slaapkamer_links
+    - cover.slaapkamer_rechts
+    - cover.woonkamer
+    closed_covers: "{% set out = [] %} {% for c in covers %}\n  {% if states(c) in
+      ['closed','closing'] %}\n    {% set out = out + [c] %}\n  {% endif %}\n{% endfor
+      %} {{ out }}"
+    w_state: '{{ states(weather_entity) }}'
+    w_state_l: '{{ states(weather_entity) | lower }}'
+    w_temp: '{{ state_attr(weather_entity, ''temperature'') }}'
+    w_wind: '{{ state_attr(weather_entity, ''wind_speed'') }}'
+    w_hum: '{{ state_attr(weather_entity, ''humidity'') }}'
+    fc0: '{% set fc = state_attr(weather_entity, ''forecast'') %} {% if fc is iterable
+      and fc|length > 0 %}{{ fc[0] }}{% else %}{{ dict() }}{% endif %}'
+    fc_cond: '{{ fc0.get(''condition'') if fc0 is mapping else none }}'
+    fc_temp: '{{ fc0.get(''temperature'') if fc0 is mapping else none }}'
+    fc_precip: '{{ fc0.get(''precipitation'') if fc0 is mapping else none }}'
+    wind_limit: '{{ states(''input_number.screens_bad_wind_kmh'') | float(35) }}'
+    open_on_precip: '{{ is_state(''input_boolean.screens_open_on_precip'',''on'')
+      }}'
+    is_precip: '{{ w_state_l in [''rainy'',''pouring'',''snowy'',''snowy-rainy'',''hail'',''lightning-rainy'',''exceptional'']
+      }}'
+    bad_weather: "{% set wind = (w_wind | float(0)) %} {{\n  (wind >= (wind_limit
+      | float)) or\n  (open_on_precip and is_precip)\n}}"
+    reasons: '{% set r = [] %} {% set wind = (w_wind | float(0)) %} {% if wind >=
+      (wind_limit | float) %}{% set r = r + [''wind >= '' ~ wind_limit ~ '' km/h'']
+      %}{% endif %} {% if open_on_precip and is_precip %}{% set r = r + [''neerslag
+      ('' ~ w_state ~ '')''] %}{% endif %} {{ r }}'
+- id: screens_open_when_bad_weather
+  alias: 'Screens: open doen bij slecht weer (10-20, elke 30 min)'
+  description: ''
+  triggers:
+  - minutes: /30
+    trigger: time_pattern
+  conditions:
+  - condition: time
+    after: '10:00:00'
+    before: '20:00:00'
+  actions:
+  - condition: template
+    value_template: '{{ bad_weather and (closed_covers | length > 0) }}'
+  - data:
+      title: Screens OPEN doen (slecht weer)
+      message: 'Reden: {{ reasons | join('', '') }}
+
+        Nog DICHT: {% for c in closed_covers %} - {{ state_attr(c,''friendly_name'')
+        or c }} ({{ states(c) }}) {% endfor %}
+
+        Weer (current): - Conditie: {{ w_state }} - Temp: {{ w_temp }}°C - Wind: {{
+        w_wind }} km/h - Luchtvochtigheid: {{ w_hum }}%
+
+        {% if fc_cond is not none or fc_temp is not none or fc_precip is not none
+        %} Verwachting (volgende forecast): {% if fc_cond is not none %}- Conditie:
+        {{ fc_cond }}{% endif %} {% if fc_temp is not none %}- Temp: {{ fc_temp }}°C{%
+        endif %} {% if fc_precip is not none %}- Neerslag: {{ fc_precip }}{% endif
+        %} {% endif %}'
+      data:
+        tag: screens_open_bad_weather
+        notification_icon: mdi:blinds-open
+        priority: high
+    action: notify.mobile_app_iphone_15_pro_max
+  mode: single
+  variables:
+    weather_entity: weather.home
+    covers:
+    - cover.feline
+    - cover.jesse
+    - cover.kantoor_voor
+    - cover.kantoor_zij
+    - cover.keuken
+    - cover.slaapkamer_links
+    - cover.slaapkamer_rechts
+    - cover.woonkamer
+    closed_covers: "{% set out = [] %} {% for c in covers %}\n  {% if states(c) in
+      ['closed','closing'] %}\n    {% set out = out + [c] %}\n  {% endif %}\n{% endfor
+      %} {{ out }}"
+    w_state: '{{ states(weather_entity) }}'
+    w_state_l: '{{ states(weather_entity) | lower }}'
+    w_temp: '{{ state_attr(weather_entity, ''temperature'') }}'
+    w_wind: '{{ state_attr(weather_entity, ''wind_speed'') }}'
+    w_hum: '{{ state_attr(weather_entity, ''humidity'') }}'
+    fc0: '{% set fc = state_attr(weather_entity, ''forecast'') %} {% if fc is iterable
+      and fc|length > 0 %}{{ fc[0] }}{% else %}{{ dict() }}{% endif %}'
+    fc_cond: '{{ fc0.get(''condition'') if fc0 is mapping else none }}'
+    fc_temp: '{{ fc0.get(''temperature'') if fc0 is mapping else none }}'
+    fc_precip: '{{ fc0.get(''precipitation'') if fc0 is mapping else none }}'
+    wind_limit: '{{ states(''input_number.screens_bad_wind_kmh'') | float(35) }}'
+    open_on_precip: '{{ is_state(''input_boolean.screens_open_on_precip'',''on'')
+      }}'
+    is_precip: '{{ w_state_l in [''rainy'',''pouring'',''snowy'',''snowy-rainy'',''hail'',''lightning-rainy'',''exceptional'']
+      }}'
+    bad_weather: "{% set wind = (w_wind | float(0)) %} {{\n  (wind >= (wind_limit
+      | float)) or\n  (open_on_precip and is_precip)\n}}"
+    reasons: '{% set r = [] %} {% set wind = (w_wind | float(0)) %} {% if wind >=
+      (wind_limit | float) %}{% set r = r + [''wind >= '' ~ wind_limit ~ '' km/h'']
+      %}{% endif %} {% if open_on_precip and is_precip %}{% set r = r + [''neerslag
+      ('' ~ w_state ~ '')''] %}{% endif %} {{ r }}'
+- id: screens_open_when_bad_weather
+  alias: 'Screens: open doen bij slecht weer (10-20, elke 30 min)'
+  description: ''
+  triggers:
+  - minutes: /30
+    trigger: time_pattern
+  conditions:
+  - condition: time
+    after: '10:00:00'
+    before: '20:00:00'
+  actions:
+  - condition: template
+    value_template: '{{ bad_weather and (closed_covers | length > 0) }}'
+  - data:
+      title: Screens OPEN doen (slecht weer)
+      message: 'Reden: {{ reasons | join('', '') }}
+
+        Nog DICHT: {% for c in closed_covers %} - {{ state_attr(c,''friendly_name'')
+        or c }} ({{ states(c) }}) {% endfor %}
+
+        Weer (current): - Conditie: {{ w_state }} - Temp: {{ w_temp }}°C - Wind: {{
+        w_wind }} km/h - Luchtvochtigheid: {{ w_hum }}%
+
+        {% if fc_cond is not none or fc_temp is not none or fc_precip is not none
+        %} Verwachting (volgende forecast): {% if fc_cond is not none %}- Conditie:
+        {{ fc_cond }}{% endif %} {% if fc_temp is not none %}- Temp: {{ fc_temp }}°C{%
+        endif %} {% if fc_precip is not none %}- Neerslag: {{ fc_precip }}{% endif
+        %} {% endif %}'
+      data:
+        tag: screens_open_bad_weather
+        notification_icon: mdi:blinds-open
+        priority: high
+    action: notify.mobile_app_iphone_15_pro_max
+  mode: single
+  variables:
+    weather_entity: weather.home
+    covers:
+    - cover.feline
+    - cover.jesse
+    - cover.kantoor_voor
+    - cover.kantoor_zij
+    - cover.keuken
+    - cover.slaapkamer_links
+    - cover.slaapkamer_rechts
+    - cover.woonkamer
+    closed_covers: "{% set out = [] %} {% for c in covers %}\n  {% if states(c) in
+      ['closed','closing'] %}\n    {% set out = out + [c] %}\n  {% endif %}\n{% endfor
+      %} {{ out }}"
+    w_state: '{{ states(weather_entity) }}'
+    w_state_l: '{{ states(weather_entity) | lower }}'
+    w_temp: '{{ state_attr(weather_entity, ''temperature'') }}'
+    w_wind: '{{ state_attr(weather_entity, ''wind_speed'') }}'
+    w_hum: '{{ state_attr(weather_entity, ''humidity'') }}'
+    fc0: '{% set fc = state_attr(weather_entity, ''forecast'') %} {% if fc is iterable
+      and fc|length > 0 %}{{ fc[0] }}{% else %}{{ dict() }}{% endif %}'
+    fc_cond: '{{ fc0.get(''condition'') if fc0 is mapping else none }}'
+    fc_temp: '{{ fc0.get(''temperature'') if fc0 is mapping else none }}'
+    fc_precip: '{{ fc0.get(''precipitation'') if fc0 is mapping else none }}'
+    wind_limit: '{{ states(''input_number.screens_bad_wind_kmh'') | float(35) }}'
+    open_on_precip: '{{ is_state(''input_boolean.screens_open_on_precip'',''on'')
+      }}'
+    is_precip: '{{ w_state_l in [''rainy'',''pouring'',''snowy'',''snowy-rainy'',''hail'',''lightning-rainy'',''exceptional'']
+      }}'
+    bad_weather: "{% set wind = (w_wind | float(0)) %} {{\n  (wind >= (wind_limit
+      | float)) or\n  (open_on_precip and is_precip)\n}}"
+    reasons: '{% set r = [] %} {% set wind = (w_wind | float(0)) %} {% if wind >=
+      (wind_limit | float) %}{% set r = r + [''wind >= '' ~ wind_limit ~ '' km/h'']
+      %}{% endif %} {% if open_on_precip and is_precip %}{% set r = r + [''neerslag
+      ('' ~ w_state ~ '')''] %}{% endif %} {{ r }}'
+- id: screens_close_when_hot_sunny
+  alias: 'Screens: dicht doen bij warm & zonnig (10-20, elke 30 min)'
+  description: ''
+  triggers:
+  - minutes: /30
+    trigger: time_pattern
+  conditions:
+  - condition: time
+    after: '10:00:00'
+    before: '20:00:00'
+  actions:
+  - condition: template
+    value_template: '{{ hot_and_sunny and (open_covers | length > 0) }}'
+  - data:
+      title: Screens DICHT doen (warm & zonnig)
+      message: 'Reden: warm & zonnig (>= {{ hot_temp }}°C, {{ w_state }})
+
+        Nog OPEN: {% for c in open_covers %} - {{ state_attr(c,''friendly_name'')
+        or c }} ({{ states(c) }}) {% endfor %}
+
+        Weer (current): - Conditie: {{ w_state }} - Temp: {{ w_temp }}°C - Wind: {{
+        w_wind }} km/h - Luchtvochtigheid: {{ w_hum }}%
+
+        {% if fc_cond is not none or fc_temp is not none or fc_precip is not none
+        %} Verwachting (volgende forecast): {% if fc_cond is not none %}- Conditie:
+        {{ fc_cond }}{% endif %} {% if fc_temp is not none %}- Temp: {{ fc_temp }}°C{%
+        endif %} {% if fc_precip is not none %}- Neerslag: {{ fc_precip }}{% endif
+        %} {% endif %}'
+      data:
+        tag: screens_close_hot_sunny
+        notification_icon: mdi:blinds
+        priority: high
+    action: notify.mobile_app_iphone_15_pro_max
+  mode: single
+  variables:
+    weather_entity: weather.home
+    covers:
+    - cover.feline
+    - cover.jesse
+    - cover.kantoor_voor
+    - cover.kantoor_zij
+    - cover.keuken
+    - cover.slaapkamer_links
+    - cover.slaapkamer_rechts
+    - cover.woonkamer
+    open_covers: "{% set out = [] %} {% for c in covers %}\n  {% if states(c) not
+      in ['closed','closing','unavailable','unknown'] %}\n    {% set out = out + [c]
+      %}\n  {% endif %}\n{% endfor %} {{ out }}"
+    w_state: '{{ states(weather_entity) }}'
+    w_state_l: '{{ states(weather_entity) | lower }}'
+    w_temp: '{{ state_attr(weather_entity, ''temperature'') }}'
+    w_wind: '{{ state_attr(weather_entity, ''wind_speed'') }}'
+    w_hum: '{{ state_attr(weather_entity, ''humidity'') }}'
+    fc0: '{% set fc = state_attr(weather_entity, ''forecast'') %} {% if fc is iterable
+      and fc|length > 0 %}{{ fc[0] }}{% else %}{{ dict() }}{% endif %}'
+    fc_cond: '{{ fc0.get(''condition'') if fc0 is mapping else none }}'
+    fc_temp: '{{ fc0.get(''temperature'') if fc0 is mapping else none }}'
+    fc_precip: '{{ fc0.get(''precipitation'') if fc0 is mapping else none }}'
+    hot_temp: '{{ states(''input_number.screens_hot_temp_c'') | float(26) }}'
+    close_on_hot_sunny: '{{ is_state(''input_boolean.screens_close_on_hot_sunny'',''on'')
+      }}'
+    is_sunnyish: '{{ w_state_l in [''sunny'',''partlycloudy'',''clear-night''] }}'
+    hot_and_sunny: '{% set temp = (w_temp | float(0)) %} {{ close_on_hot_sunny and
+      temp >= (hot_temp | float) and is_sunnyish }}'
+- id: '1769851596410'
+  alias: Weer + screens status (debug) naar iPhone
+  description: ''
+  triggers:
+  - at: 09:00:00
+    trigger: time
+  actions:
+  - variables:
+      weather_entity: weather.openweathermap
+      temp_sensor: sensor.openweathermap_apparent_temperature
+      covers:
+      - cover.feline
+      - cover.jesse
+      - cover.kantoor_voor
+      - cover.kantoor_zij
+      - cover.keuken
+      - cover.slaapkamer_links
+      - cover.slaapkamer_rechts
+      - cover.woonkamer
+      open_lines: "{% set lines = [] %} {% for s in expand(covers) %}\n  {% set pos
+        = s.attributes.current_position %}\n  {% if pos is number %}\n    {# Aanname:
+        0 = dicht, alles anders = niet-dicht #}\n    {% if (pos | int) != 0 %}\n      {%
+        set lines = lines + ['- ' ~ s.name ~ ' | pos=' ~ (pos|int) ~ '% | state='
+        ~ s.state] %}\n    {% endif %}\n  {% else %}\n    {# Fallback op state #}\n
+        \   {% if s.state not in ['closed','closing','unavailable','unknown'] %}\n
+        \     {% set lines = lines + ['- ' ~ s.name ~ ' | state=' ~ s.state] %}\n
+        \   {% endif %}\n  {% endif %}\n{% endfor %} {{ lines | join('\\n') }}"
+      closed_lines: "{% set lines = [] %} {% for s in expand(covers) %}\n  {% set
+        pos = s.attributes.current_position %}\n  {% if pos is number %}\n    {% if
+        (pos | int) == 0 %}\n      {% set lines = lines + ['- ' ~ s.name ~ ' | pos='
+        ~ (pos|int) ~ '% | state=' ~ s.state] %}\n    {% endif %}\n  {% else %}\n
+        \   {% if s.state in ['closed','closing'] %}\n      {% set lines = lines +
+        ['- ' ~ s.name ~ ' | state=' ~ s.state] %}\n    {% endif %}\n  {% endif %}\n{%
+        endfor %} {{ lines | join('\\n') }}"
+      debug_lines: "{% set lines = [] %} {% for s in expand(covers) %}\n  {% set pos
+        = s.attributes.current_position %}\n  {% if pos is number %}\n    {% set lines
+        = lines + ['- ' ~ s.entity_id ~ ' | ' ~ s.state ~ ' | pos=' ~ (pos|int) ~
+        '%'] %}\n  {% else %}\n    {% set lines = lines + ['- ' ~ s.entity_id ~ '
+        | ' ~ s.state ~ ' | pos=NA'] %}\n  {% endif %}\n{% endfor %} {{ lines | join('\\n')
+        }}"
+      w_state: '{{ states(weather_entity) }}'
+      w_temp: '{{ states(temp_sensor) }}'
+      w_wind: '{{ state_attr(weather_entity, ''wind_speed'') }}'
+      w_hum: '{{ state_attr(weather_entity, ''humidity'') }}'
+      msg: "\U0001F324 Weer (current): - Conditie: {{ w_state }} - Gevoelstemperatuur:
+        {{ w_temp }} °C - Wind: {{ w_wind }} km/h - Luchtvochtigheid: {{ w_hum }}
+        %\n{% if open_lines | trim != '' %} \U0001FA9F Screens OPEN (volgens HA):
+        {{ open_lines }} {% else %} ✅ Alle screens staan dicht (volgens HA) {% endif
+        %}\n---- \U0001F50E Debug (state/pos per cover): {{ debug_lines }}"
+  - data:
+      title: Weer + screens status
+      message: '{{ msg }}'
+      data:
+        tag: screens_weather_status
+        notification_icon: mdi:weather-partly-cloudy
+        priority: high
+    action: notify.mobile_app_iphone_15_pro_max
+  mode: single
+- id: '1770220569199'
+  alias: Tesla status om 21:00
+  description: Stuurt batterijstatus en laadstatus om 21:00
+  triggers:
+  - at: '21:00:00'
+    trigger: time
+  actions:
+  - data:
+      title: "\U0001F697 Tesla status"
+      message: "Batterij: {{ states('sensor.k_i_t_t_battery_level') }}% {% if is_state('switch.k_i_t_t_charge',
+        'on') %}\n  \U0001F50C Hij is aan het laden.\n{% else %}\n  ❌ Hij is niet
+        aan het laden.\n{% endif %}"
+    action: notify.mobile_app_iphone_15_pro_max
+  mode: single
+- id: '1770220613148'
+  alias: Tesla koud waarschuwing om 06:00
+  description: Waarschuwing als het koud is
+  triggers:
+  - at: 06:00:00
+    trigger: time
+  conditions:
+  - condition: numeric_state
+    entity_id: sensor.kitt_inside_temperature
+    below: 8
+  actions:
+  - data:
+      title: ❄️ Tesla koud
+      message: 'Het is {{ states(''sensor.kitt_inside_temperature'') }}°C in de auto.
+        Denk eraan om hem te verwarmen voordat je vertrekt.
+
+        '
+    action: notify.mobile_app_iphone_15_pro_max
+  mode: single
+- id: '1770224905469'
+  alias: K.I.T.T. unlock charge cable (ON)
+  description: Helper ON -> ontgrendel laadkabel
+  triggers:
+  - entity_id: input_boolean.kitt_unlock_charge_cable
+    to: 'on'
+    trigger: state
+  conditions: []
+  actions:
+  - target:
+      entity_id: lock.k_i_t_t_charge_cable_lock
+    action: lock.unlock
+  mode: single
+- id: '1770224924426'
+  alias: K.I.T.T. unlock charge cable auto-off
+  description: ''
+  triggers:
+  - entity_id: input_boolean.kitt_unlock_charge_cable
+    to: 'on'
+    trigger: state
+  actions:
+  - delay: 00:00:05
+  - target:
+      entity_id: input_boolean.kitt_unlock_charge_cable
+    action: input_boolean.turn_off
+  mode: restart
+- id: '1771664197975'
+  alias: HomePod push - Woonkamer (pulse elke 5 min)
+  description: Puls de HomePod trigger-switch zodat HomeKit automation kan draaien
+  triggers:
+  - minutes: /5
+    trigger: time_pattern
+  conditions: []
+  actions:
+  - target:
+      entity_id: input_boolean.homepod_push_woonkamer
+    action: input_boolean.turn_on
+  - delay: 00:00:01
+  - target:
+      entity_id: input_boolean.homepod_push_woonkamer
+    action: input_boolean.turn_off
+  mode: single

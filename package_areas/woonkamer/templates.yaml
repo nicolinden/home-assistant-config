@@ -1,0 +1,67 @@
+- binary_sensor:
+    # True zodra er in de woonkamer minimaal 1 "meetellende" lamp aan staat
+    - name: woonkamer_lights_on
+      unique_id: woonkamer_lights_on
+      state: >
+        {% set ignore = label_entities('dontCountAsLight') | list %}
+        {% set ids = area_entities('woonkamer')
+            | select('match','^light\\.')
+            | reject('in', ignore)
+            | list %}
+        {{ ids | count > 0 and (expand(ids) | selectattr('state','eq','on') | list | count > 0) }}
+
+    # True als het Philips-scherm echt aan staat
+    - name: woonkamer_tv_on
+      unique_id: woonkamer_tv_on
+      state: >
+        {{ is_state('switch.55oled705_12_screen_state', 'on') }}
+
+    # True als de Philips TV entity überhaupt bereikbaar is
+    - name: woonkamer_tv_bereikbaar
+      unique_id: woonkamer_tv_bereikbaar
+      state: >
+        {{ states('switch.55oled705_12_screen_state') not in ['unavailable', 'unknown', 'none'] }}
+
+    # True als de Apple TV media_player bereikbaar is
+    - name: woonkamer_appletv_online
+      unique_id: woonkamer_appletv_online
+      state: >
+        {{ states('media_player.woonkamer_tv') not in ['unavailable', 'unknown', 'none'] }}
+
+- sensor:
+    # Telt hoeveel meetellende lampen in de woonkamer aan staan
+    - name: woonkamer_lights_on_count
+      unique_id: woonkamer_lights_on_count
+      state: >
+        {% set ignore = label_entities('dontCountAsLight') | list %}
+        {% set ids = area_entities('woonkamer')
+            | select('match','^light\\.')
+            | reject('in', ignore)
+            | list %}
+        {{ expand(ids) | selectattr('state','eq','on') | list | count }}
+
+- trigger:
+    # Verwacht custom event met temperature + humidity data
+    - platform: event
+      event_type: homepod_woonkamer_climate
+  sensor:
+    - name: "Woonkamer HomePod Temperatuur"
+      unique_id: woonkamer_homepod_temperature
+      device_class: temperature
+      state_class: measurement
+      unit_of_measurement: "°C"
+      state: >-
+        {{ (trigger.event.data.temperature | string
+            | regex_findall_index('[-+]?[0-9]*[\\.,]?[0-9]+', 0)
+            | replace(',', '.')
+            | float) }}
+
+    - name: "Woonkamer HomePod Luchtvochtigheid"
+      unique_id: woonkamer_homepod_humidity
+      device_class: humidity
+      state_class: measurement
+      unit_of_measurement: "%"
+      state: >-
+        {{ (trigger.event.data.humidity | string
+            | replace(',', '.')
+            | float) }}

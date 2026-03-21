@@ -1,0 +1,84 @@
+type: vertical-stack
+cards:
+  # --- Always visible summary ---
+  - type: custom:mushroom-title-card
+    title: Tesla
+    subtitle: Battery & charging
+
+  - type: horizontal-stack
+    cards:
+      - type: custom:mushroom-entity-card
+        entity: sensor.k_i_t_t_battery_level
+        name: Battery
+        icon: mdi:battery
+        primary_info: name
+        secondary_info: state
+      - type: custom:mushroom-entity-card
+        entity: sensor.k_i_t_t_battery_range
+        name: Range
+        icon: mdi:map-marker-distance
+        primary_info: name
+        secondary_info: state
+
+  - type: custom:mushroom-entity-card
+    entity: binary_sensor.k_i_t_t_charge_cable
+    name: Charge cable
+    icon: mdi:ev-plug-tesla
+    primary_info: name
+    secondary_info: state
+
+  # --- Only when cable is connected (charging context) ---
+  - type: conditional
+    conditions:
+      - entity: binary_sensor.k_i_t_t_charge_cable
+        state: "on"
+    card:
+      type: vertical-stack
+      cards:
+        - type: custom:mushroom-title-card
+          title: Charging
+          subtitle: Live details
+
+        - type: horizontal-stack
+          cards:
+            - type: custom:mushroom-entity-card
+              entity: sensor.k_i_t_t_charger_power
+              name: Power
+              icon: mdi:flash
+              primary_info: name
+              secondary_info: state
+            - type: custom:mushroom-entity-card
+              entity: sensor.k_i_t_t_charge_rate
+              name: Rate
+              icon: mdi:speedometer
+              primary_info: name
+              secondary_info: state
+
+        - type: horizontal-stack
+          cards:
+            - type: custom:mushroom-entity-card
+              entity: sensor.k_i_t_t_time_to_full_charge
+              name: To full
+              icon: mdi:clock-outline
+              primary_info: name
+              secondary_info: state
+            - type: custom:mushroom-entity-card
+              entity: sensor.k_i_t_t_charge_energy_added
+              name: Added
+              icon: mdi:battery-plus
+              primary_info: name
+              secondary_info: state
+
+        - type: custom:mushroom-entity-card
+          entity: number.k_i_t_t_charge_limit
+          name: Charge limit
+          icon: mdi:battery-lock
+          primary_info: name
+          secondary_info: state
+
+        - type: custom:mushroom-entity-card
+          entity: number.k_i_t_t_charge_current
+          name: Charge current
+          icon: mdi:current-ac
+          primary_info: name
+          secondary_info: state

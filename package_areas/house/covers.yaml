@@ -1,0 +1,12 @@
+- platform: group
+  name: Screens
+  unique_id: screens_group
+  entities:
+    - cover.woonkamer
+    - cover.keuken
+    - cover.kantoor_voor
+    - cover.kantoor_zij
+    - cover.slaapkamer_links
+    - cover.slaapkamer_rechts
+    - cover.feline
+    - cover.jesse

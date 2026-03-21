@@ -1,0 +1,7 @@
+title: Cabin overheat
+path: tesla-overheat
+subview: true
+cards:
+  - type: thermostat
+    entity: climate.k_i_t_t_cabin_overheat_protection
+    name: Cabin overheat protection

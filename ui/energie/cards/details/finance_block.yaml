@@ -1,0 +1,51 @@
+type: vertical-stack
+cards:
+  - type: custom:mushroom-title-card
+    title: Financiën
+    subtitle: Stroomkosten & teruglevering (totaal + vandaag)
+
+  - type: horizontal-stack
+    cards:
+      - type: custom:mushroom-entity-card
+        entity: sensor.energy_import_total_cost
+        name: Kosten totaal
+        icon: mdi:cash-minus
+        primary_info: name
+        secondary_info: state
+
+      - type: custom:mushroom-entity-card
+        entity: sensor.energy_export_total_revenue
+        name: Opbrengst totaal
+        icon: mdi:cash-plus
+        primary_info: name
+        secondary_info: state
+
+  - type: custom:mushroom-entity-card
+    entity: sensor.energy_net_result
+    name: Netto totaal
+    icon: mdi:scale-balance
+    primary_info: name
+    secondary_info: state
+
+  - type: horizontal-stack
+    cards:
+      - type: custom:mushroom-entity-card
+        entity: sensor.energy_import_cost_today
+        name: Kosten vandaag
+        icon: mdi:calendar-today
+        primary_info: name
+        secondary_info: state
+
+      - type: custom:mushroom-entity-card
+        entity: sensor.energy_export_revenue_today
+        name: Opbrengst vandaag
+        icon: mdi:calendar-today
+        primary_info: name
+        secondary_info: state
+
+  - type: custom:mushroom-entity-card
+    entity: sensor.energy_net_result_today
+    name: Netto vandaag
+    icon: mdi:scale-balance
+    primary_info: name
+    secondary_info: state

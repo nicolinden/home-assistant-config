@@ -1,0 +1,64 @@
+
+water_tariff_eur_per_m3:
+  name: Water tarief (€/m³)
+  min: 0
+  max: 10
+  step: 0.01
+  unit_of_measurement: "€/m³"
+  initial: 1.67
+
+water_fixed_yearly_eur:
+  name: Water vastrecht (€/jaar)
+  min: 0
+  max: 500
+  step: 0.01
+  unit_of_measurement: "€/jaar"
+  initial: 114.07
+
+elec_import_t1_eur_per_kwh:
+  name: Stroom afname T1 (€/kWh)
+  min: 0
+  max: 2
+  step: 0.0001
+  unit_of_measurement: "€/kWh"
+  initial: 0.25399
+
+elec_import_t2_eur_per_kwh:
+  name: Stroom afname T2 (€/kWh)
+  min: 0
+  max: 2
+  step: 0.0001
+  unit_of_measurement: "€/kWh"
+  initial: 0.25641
+
+elec_export_t1_eur_per_kwh:
+  name: Stroom teruglevering T1 (€/kWh)
+  min: 0
+  max: 2
+  step: 0.0001
+  unit_of_measurement: "€/kWh"
+  initial: 0.1500
+
+elec_export_t2_eur_per_kwh:
+  name: Stroom teruglevering T2 (€/kWh)
+  min: 0
+  max: 2
+  step: 0.0001
+  unit_of_measurement: "€/kWh"
+  initial: 0.1500
+
+battery_low_pct:
+  name: Battery low threshold
+  min: 1
+  max: 100
+  step: 1
+  unit_of_measurement: "%"
+  initial: 40
+
+battery_critical_pct:
+  name: Battery critical threshold
+  min: 1
+  max: 100
+  step: 1
+  unit_of_measurement: "%"
+  initial: 20

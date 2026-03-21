@@ -1,0 +1,4 @@
+template: !include ../package_areas/feline/templates.yaml
+automation: !include ../package_areas/feline/automations.yaml
+input_boolean: !include ../package_areas/feline/input_booleans.yaml
+input_datetime: !include ../package_areas/feline/input_datetimes.yaml

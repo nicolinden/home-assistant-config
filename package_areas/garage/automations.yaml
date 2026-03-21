@@ -1,0 +1,83 @@
+- id: '1769780332692'
+  alias: Frituurpan - waarschuwing elke 30 min zolang aan
+  description: ''
+  trigger:
+    - platform: device
+      type: turned_on
+      device_id: 02ba68de1ec08109dbddb0e6b948c6aa
+      entity_id: b24fe08e85ad9728f34fa5c531e4d9ae
+      domain: switch
+  action:
+    - delay: "00:02:00"
+    - repeat:
+        while:
+          - condition: state
+            entity_id: b24fe08e85ad9728f34fa5c531e4d9ae
+            state: 'on'
+        sequence:
+          - service: notify.mobile_app_iphone_15_pro_max
+            data:
+              title: ⚠️ Frituurpan staat AAN
+              message: >-
+                De frituurpan is nog aan. Controleer of dit de bedoeling is en zet hem uit indien nodig.
+              data:
+                interruption-level: time-sensitive
+          - delay: "00:30:00"
+  mode: restart
+
+- id: '1769780362983'
+  alias: Frituurpan - auto uit na 1 uur
+  description: ''
+  trigger:
+    - platform: state
+      entity_id: b24fe08e85ad9728f34fa5c531e4d9ae
+      to: 'on'
+      for: "01:00:00"
+  action:
+    - service: switch.turn_off
+      target:
+        entity_id: b24fe08e85ad9728f34fa5c531e4d9ae
+    - service: notify.mobile_app_iphone_15_pro_max
+      data:
+        title: ✅ Frituurpan automatisch uitgezet
+        message: De frituurpan stond 1 uur aan en is automatisch uitgezet.
+        data:
+          interruption-level: time-sensitive
+  mode: single
+
+- id: '1769780578162'
+  alias: Frituurpan - melding aan/uit met tijd en duur
+  description: ''
+  trigger:
+    - platform: state
+      entity_id: b24fe08e85ad9728f34fa5c531e4d9ae
+      to:
+        - 'on'
+        - 'off'
+  action:
+    - choose:
+        - conditions:
+            - condition: template
+              value_template: "{{ trigger.to_state.state == 'on' }}"
+          sequence:
+            - service: notify.mobile_app_iphone_15_pro_max
+              data:
+                title: "🍟 Frituurpan AAN"
+                message: "Aangezet om {{ now().strftime('%H:%M') }}."
+        - conditions:
+            - condition: template
+              value_template: "{{ trigger.to_state.state == 'off' and trigger.from_state.state == 'on' }}"
+          sequence:
+            - variables:
+                started_ts: "{{ as_timestamp(trigger.from_state.last_changed) }}"
+                duration_sec: "{{ as_timestamp(now()) - started_ts }}"
+                duration_min: "{{ (duration_sec / 60) | round(0) }}"
+                started_time: "{{ trigger.from_state.last_changed.astimezone().strftime('%H:%M') }}"
+            - service: notify.mobile_app_iphone_15_pro_max
+              data:
+                title: ✅ Frituurpan UIT
+                message: >-
+                  Uitgezet om {{ now().strftime('%H:%M') }}.
+                  Stond aan sinds {{ started_time }} ({{ duration_min }} min).
+      default: []
+  mode: single

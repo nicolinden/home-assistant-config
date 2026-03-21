@@ -1,0 +1,145 @@
+- sensor:
+    # - name: UI form factor
+    #   unique_id: ui_form_factor
+    #   state: >
+    #     {% set w = (state_attr('sensor.browser_mod', 'width') | int(0)) %}
+    #     {% if w > 1100 %}
+    #       desktop
+    #     {% else %}
+    #       mobile
+    #     {% endif %}
+
+    - name: "Batteries total (numeric)"
+      unique_id: batteries_total_numeric
+      icon: mdi:battery
+      state: >
+        {% set ents = label_entities('battery') | select('match','^sensor\.') | list %}
+        {% set vals = ents | map('states') | map('float', default=none) | list %}
+        {{ vals | select('!=', none) | list | count }}
+
+    - name: "Batteries below low"
+      unique_id: batteries_below_low
+      icon: mdi:battery-alert
+      state: >
+        {% set low = states('input_number.battery_low_pct') | float(40) %}
+        {% set ents = label_entities('battery') | select('match','^sensor\.') | list %}
+        {% set vals = ents | map('states') | map('float', default=none) | list %}
+        {{ vals | select('!=', none) | select('lt', low) | list | count }}
+
+
+    - name: "Batteries critical"
+      unique_id: batteries_critical
+      icon: mdi:battery-alert
+      state: >
+        {% set threshold = states('input_number.battery_critical_pct') | float(10) %}
+        {% set ents = label_entities('battery') | select('match','^sensor\.') | list %}
+        {% set vals = ents | map('states') | map('float', default=none) | list %}
+        {{ vals | select('!=', none) | select('lt', threshold) | list | count }}    
+
+    - name: lights_total_count
+      unique_id: lights_total_count
+      state: >
+        {% set ignore = label_entities('dontCountAsLight') | list %}
+        {% set areas = [
+          'woonkamer','keuken','hal','garage','kantoor','slaapkamer',
+          'slaapkamer_feline','slaapkamer_jesse','gamekamer','badkamer',
+          'wasruimte','toilet_beneden','toilet_boven','tuin', 'overloop'
+        ] %}
+
+        {% set ns = namespace(ids=[]) %}
+        {% for a in areas %}
+          {% set ns.ids = ns.ids + (
+            area_entities(a)
+            | select('match','^light\\.')
+            | reject('in', ignore)
+            | list
+          ) %}
+        {% endfor %}
+
+        {# groups eruit (light groups hebben attributes.entity_id) #}
+        {{ expand(ns.ids)
+            | rejectattr('attributes.entity_id','defined')
+            | map(attribute='entity_id')
+            | unique
+            | list
+            | count }}
+
+    - name: lights_on_count
+      unique_id: lights_on_count
+      state: >
+        {% set ignore = label_entities('dontCountAsLight') | list %}
+        {% set areas = [
+          'woonkamer','keuken','hal','garage','kantoor','slaapkamer',
+          'slaapkamer_feline','slaapkamer_jesse','gamekamer','badkamer',
+          'wasruimte','toilet_beneden','toilet_boven','tuin', 'overloop'
+        ] %}
+
+        {% set ns = namespace(ids=[]) %}
+        {% for a in areas %}
+          {% set ns.ids = ns.ids + (
+            area_entities(a)
+            | select('match','^light\\.')
+            | reject('in', ignore)
+            | list
+          ) %}
+        {% endfor %}
+
+        {{ expand(ns.ids)
+            | rejectattr('attributes.entity_id','defined')
+            | selectattr('state','eq','on')
+            | map(attribute='entity_id')
+            | unique
+            | list
+            | count }}
+
+
+    - name: screens_dicht
+      unique_id: screens_dicht
+      state: >
+        {% set covers = [
+          'cover.feline',
+          'cover.jesse',
+          'cover.kantoor_voor',
+          'cover.kantoor_zij',
+          'cover.keuken',
+          'cover.slaapkamer_links',
+          'cover.slaapkamer_rechts',
+          'cover.woonkamer'
+        ] %}
+        {% set ns = namespace(count=0) %}
+
+        {% for entity_id in covers %}
+          {% set pos = state_attr(entity_id, 'current_position') %}
+          {% if pos is number and pos < 100 %}
+            {% set ns.count = ns.count + 1 %}
+          {% endif %}
+        {% endfor %}
+
+        {{ ns.count }}
+
+
+    # - name: screens_totaal
+    #   unique_id: screens_totaal
+    #   state: 6
+
+    # - name: screens_dicht
+    #   unique_id: screens_dicht
+    #   state: >
+    #     {% set items = {
+    #       'woonkamer': ['cover.woonkamer'],
+    #       'keuken': ['cover.keuken'],
+    #       'kantoor': ['cover.kantoor_voor','cover.kantoor_zij'],
+    #       'slaapkamer': ['cover.slaapkamer_links','cover.slaapkamer_rechts'],
+    #       'feline': ['cover.feline'],
+    #       'jesse': ['cover.jesse']
+    #     } %}
+
+    #     {% set ns = namespace(count=0) %}
+    #     {% for k, covers in items.items() %}
+    #       {% set states_list = expand(covers) | map(attribute='state') | list %}
+    #       {# telt als dicht zodra er minimaal 1 'closed' is #}
+    #       {% if 'closed' in states_list %}
+    #         {% set ns.count = ns.count + 1 %}
+    #       {% endif %}
+    #     {% endfor %}
+    #     {{ ns.count }}

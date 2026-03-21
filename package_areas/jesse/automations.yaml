@@ -1,0 +1,321 @@
+- id: homepod_push_slaapkamer_jesse_pulse_5min
+  alias: "HomePod push - Slaapkamer Jesse (pulse elke 5 min)"
+  mode: single
+  trigger:
+    - platform: time_pattern
+      minutes: "/5"
+  condition: []
+  action:
+    - service: input_boolean.turn_on
+      target:
+        entity_id: input_boolean.homepod_push_slaapkamer_jesse
+    - delay: "00:00:01"
+    - service: input_boolean.turn_off
+      target:
+        entity_id: input_boolean.homepod_push_slaapkamer_jesse
+
+###############################################################################
+# SLAAPKAMER JESSE - Gira Friends of Hue (Hue Bridge) automations
+# Event flow: initial_press -> repeat... -> long_release (soms ook short_release)
+#
+# Vereist input_booleans:
+# - input_boolean.jesse_dim_main_up
+# - input_boolean.jesse_dim_main_down
+# - input_boolean.jesse_dim_vide_up
+# - input_boolean.jesse_dim_vide_down
+###############################################################################
+
+# --- Button 1 short: main lights aan (alleen als we NIET aan het dimmen zijn)
+- alias: Slaapkamer Jesse schakelaar - Btn1 short - Main aan
+  mode: single
+  trigger:
+    - platform: state
+      entity_id: event.jesse_schakelaar_button_1
+  condition:
+    - condition: template
+      value_template: "{{ trigger.to_state.attributes.event_type == 'short_release' }}"
+    - condition: state
+      entity_id: input_boolean.jesse_dim_main_up
+      state: "off"
+  action:
+    - service: light.turn_on
+      target:
+        entity_id:
+          - light.lines_cbe8
+          - light.plug_mini_eu
+          - light.jesse_plafond
+          - light.ikea_of_sweden_ormanas_led_strip
+
+# --- Button 2 short: main lights uit (alleen als we NIET aan het dimmen zijn)
+- alias: Slaapkamer Jesse schakelaar - Btn2 short - Main uit
+  mode: single
+  trigger:
+    - platform: state
+      entity_id: event.jesse_schakelaar_button_2
+  condition:
+    - condition: template
+      value_template: "{{ trigger.to_state.attributes.event_type == 'short_release' }}"
+    - condition: state
+      entity_id: input_boolean.jesse_dim_main_down
+      state: "off"
+  action:
+    - service: light.turn_off
+      target:
+        entity_id:
+          - light.lines_cbe8
+          - light.plug_mini_eu
+          - light.jesse_plafond
+          - light.ikea_of_sweden_ormanas_led_strip
+
+# --- Button 3 short: vide aan (alleen als we NIET aan het dimmen zijn)
+- alias: Slaapkamer Jesse schakelaar - Btn3 short - Vide aan
+  mode: single
+  trigger:
+    - platform: state
+      entity_id: event.jesse_schakelaar_button_3
+  condition:
+    - condition: template
+      value_template: "{{ trigger.to_state.attributes.event_type == 'short_release' }}"
+    - condition: state
+      entity_id: input_boolean.jesse_dim_vide_up
+      state: "off"
+  action:
+    - service: light.turn_on
+      target:
+        entity_id:
+          - light.vide_1
+          - light.vide_2
+
+# --- Button 4 short: vide uit, main behouden (alleen als we NIET aan het dimmen zijn)
+- alias: Slaapkamer Jesse schakelaar - Btn4 short - Vide uit (main behouden)
+  mode: single
+  trigger:
+    - platform: state
+      entity_id: event.jesse_schakelaar_button_4
+  condition:
+    - condition: template
+      value_template: "{{ trigger.to_state.attributes.event_type == 'short_release' }}"
+    - condition: state
+      entity_id: input_boolean.jesse_dim_vide_up
+      state: "off"
+    - condition: state
+      entity_id: input_boolean.jesse_dim_vide_down
+      state: "off"
+  action:
+    - variables:
+        main_was_aan: "{{ is_state('light.jesse_plafond', 'on') or is_state('light.lines_cbe8','on') or is_state('light.ikea_of_sweden_ormanas_led_strip','on') or is_state('light.plug_mini_eu','on') }}"
+    - service: light.turn_off
+      target:
+        entity_id:
+          - light.vide_1
+          - light.vide_2
+    - choose:
+        - conditions:
+            - condition: template
+              value_template: "{{ main_was_aan }}"
+          sequence:
+            - service: light.turn_on
+              target:
+                entity_id:
+                  - light.lines_cbe8
+                  - light.plug_mini_eu
+                  - light.jesse_plafond
+                  - light.ikea_of_sweden_ormanas_led_strip
+
+###############################################################################
+# DIMMEN (Hue Bridge): start op 'repeat' (dus alleen bij echt vasthouden)
+###############################################################################
+
+# --- Btn1 hold: dim main omhoog (start bij repeat)
+- alias: Slaapkamer Jesse Btn1 hold - dim main omhoog
+  mode: restart
+  trigger:
+    - platform: state
+      entity_id: event.jesse_schakelaar_button_1
+  condition:
+    - condition: template
+      value_template: "{{ trigger.to_state.attributes.event_type == 'repeat' }}"
+    - condition: state
+      entity_id: input_boolean.jesse_dim_main_up
+      state: "off"
+  action:
+    - service: input_boolean.turn_on
+      target:
+        entity_id: input_boolean.jesse_dim_main_up
+    - repeat:
+        while:
+          - condition: state
+            entity_id: input_boolean.jesse_dim_main_up
+            state: "on"
+        sequence:
+          - variables:
+              ref: "{{ state_attr('light.jesse_plafond','brightness') | int(1) }}"
+              next: "{{ [ref + 35, 255] | min }}"
+          - service: light.turn_on
+            target:
+              entity_id:
+                - light.lines_cbe8
+                - light.jesse_plafond
+                - light.ikea_of_sweden_ormanas_led_strip
+            data:
+              brightness: "{{ next }}"
+          - delay: 0.10
+
+# --- Btn1 release: stop dim main omhoog
+- alias: Slaapkamer Jesse Btn1 release - stop dim main omhoog
+  mode: single
+  trigger:
+    - platform: state
+      entity_id: event.jesse_schakelaar_button_1
+  condition:
+    - condition: template
+      value_template: "{{ trigger.to_state.attributes.event_type in ['short_release','long_release'] }}"
+  action:
+    - service: input_boolean.turn_off
+      target:
+        entity_id: input_boolean.jesse_dim_main_up
+
+# --- Btn2 hold: dim main omlaag (start bij repeat)
+- alias: Slaapkamer Jesse Btn2 hold - dim main omlaag
+  mode: restart
+  trigger:
+    - platform: state
+      entity_id: event.jesse_schakelaar_button_2
+  condition:
+    - condition: template
+      value_template: "{{ trigger.to_state.attributes.event_type == 'repeat' }}"
+    - condition: state
+      entity_id: input_boolean.jesse_dim_main_down
+      state: "off"
+  action:
+    - service: input_boolean.turn_on
+      target:
+        entity_id: input_boolean.jesse_dim_main_down
+    - repeat:
+        while:
+          - condition: state
+            entity_id: input_boolean.jesse_dim_main_down
+            state: "on"
+        sequence:
+          - variables:
+              ref: "{{ state_attr('light.jesse_plafond','brightness') | int(1) }}"
+              next: "{{ [ref - 35, 1] | max }}"
+          - service: light.turn_on
+            target:
+              entity_id:
+                - light.lines_cbe8
+                - light.jesse_plafond
+                - light.ikea_of_sweden_ormanas_led_strip
+            data:
+              brightness: "{{ next }}"
+          - delay: 0.10
+
+# --- Btn2 release: stop dim main omlaag
+- alias: Slaapkamer Jesse Btn2 release - stop dim main omlaag
+  mode: single
+  trigger:
+    - platform: state
+      entity_id: event.jesse_schakelaar_button_2
+  condition:
+    - condition: template
+      value_template: "{{ trigger.to_state.attributes.event_type in ['short_release','long_release'] }}"
+  action:
+    - service: input_boolean.turn_off
+      target:
+        entity_id: input_boolean.jesse_dim_main_down
+
+# --- Btn3 hold: dim vide omhoog (start bij repeat)
+- alias: Slaapkamer Jesse Btn3 hold - dim vide omhoog
+  mode: restart
+  trigger:
+    - platform: state
+      entity_id: event.jesse_schakelaar_button_3
+  condition:
+    - condition: template
+      value_template: "{{ trigger.to_state.attributes.event_type == 'repeat' }}"
+    - condition: state
+      entity_id: input_boolean.jesse_dim_vide_up
+      state: "off"
+  action:
+    - service: input_boolean.turn_on
+      target:
+        entity_id: input_boolean.jesse_dim_vide_up
+    - repeat:
+        while:
+          - condition: state
+            entity_id: input_boolean.jesse_dim_vide_up
+            state: "on"
+        sequence:
+          - variables:
+              ref: "{{ state_attr('light.vide_1','brightness') | int(1) }}"
+              next: "{{ [ref + 30, 255] | min }}"
+          - service: light.turn_on
+            target:
+              entity_id:
+                - light.vide_1
+                - light.vide_2
+            data:
+              brightness: "{{ next }}"
+          - delay: 0.10
+
+# --- Btn3 release: stop dim vide omhoog
+- alias: Slaapkamer Jesse Btn3 release - stop dim vide omhoog
+  mode: single
+  trigger:
+    - platform: state
+      entity_id: event.jesse_schakelaar_button_3
+  condition:
+    - condition: template
+      value_template: "{{ trigger.to_state.attributes.event_type in ['short_release','long_release'] }}"
+  action:
+    - service: input_boolean.turn_off
+      target:
+        entity_id: input_boolean.jesse_dim_vide_up
+
+# --- Btn4 hold: dim vide omlaag (start bij repeat)
+- alias: Slaapkamer Jesse Btn4 hold - dim vide omlaag
+  mode: restart
+  trigger:
+    - platform: state
+      entity_id: event.jesse_schakelaar_button_4
+  condition:
+    - condition: template
+      value_template: "{{ trigger.to_state.attributes.event_type == 'repeat' }}"
+    - condition: state
+      entity_id: input_boolean.jesse_dim_vide_down
+      state: "off"
+  action:
+    - service: input_boolean.turn_on
+      target:
+        entity_id: input_boolean.jesse_dim_vide_down
+    - repeat:
+        while:
+          - condition: state
+            entity_id: input_boolean.jesse_dim_vide_down
+            state: "on"
+        sequence:
+          - variables:
+              ref: "{{ state_attr('light.vide_1','brightness') | int(1) }}"
+              next: "{{ [ref - 30, 1] | max }}"
+          - service: light.turn_on
+            target:
+              entity_id:
+                - light.vide_1
+                - light.vide_2
+            data:
+              brightness: "{{ next }}"
+          - delay: 0.10
+
+# --- Btn4 release: stop dim vide omlaag
+- alias: Slaapkamer Jesse Btn4 release - stop dim vide omlaag
+  mode: single
+  trigger:
+    - platform: state
+      entity_id: event.jesse_schakelaar_button_4
+  condition:
+    - condition: template
+      value_template: "{{ trigger.to_state.attributes.event_type in ['short_release','long_release'] }}"
+  action:
+    - service: input_boolean.turn_off
+      target:
+        entity_id: input_boolean.jesse_dim_vide_down

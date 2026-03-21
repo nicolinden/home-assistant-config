@@ -1,0 +1,44 @@
+type: custom:apexcharts-card
+header:
+  show: true
+  title: 📈 Vandaag – Overzicht (vermogen)
+  show_states: true
+graph_span: 24h
+span:
+  start: day
+now:
+  show: true
+apex_config:
+  chart:
+    height: 320
+  stroke:
+    width: 3
+    curve: smooth
+  grid:
+    strokeDashArray: 4
+  legend:
+    show: true
+    position: bottom
+yaxis:
+  - decimals: 0
+series:
+  - entity: sensor.goodwe_pv_power
+    name: PV
+    type: area
+    opacity: 0.25
+    group_by:
+      duration: 5min
+      func: avg
+  - entity: sensor.home_power
+    name: Huis
+    type: line
+    group_by:
+      duration: 5min
+      func: avg
+  - entity: sensor.grid_power
+    name: Net
+    type: line
+    stroke_dash: 6
+    group_by:
+      duration: 5min
+      func: avg

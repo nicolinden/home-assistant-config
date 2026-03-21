@@ -1,0 +1,99 @@
+- binary_sensor:
+    - name: kantoor_lights_on
+      unique_id: kantoor_lights_on
+      state: >
+        {% set ignore = label_entities('dontCountAsLight') | list %}
+        {% set ids = area_entities('kantoor')
+          | select('match','^light\\.')
+          | reject('in', ignore)
+          | list %}
+        {{ ids | count > 0 and (expand(ids) | selectattr('state','eq','on') | list | count > 0) }}
+
+    - name: "kantoor cover open"
+      unique_id: kantoor_cover_open
+      state: >
+        {{ state_attr('cover.kantoor_screens', 'current_position') | int(0) == 100 }}
+      device_class: opening
+
+    - name: "HP Printer Low Toner"
+      unique_id: hp_printer_low_toner
+      state: >
+        {{
+          states('sensor.hp_toner_black') | int(100) < 30
+          or states('sensor.hp_toner_cyan') | int(100) < 30
+          or states('sensor.hp_toner_magenta') | int(100) < 30
+          or states('sensor.hp_toner_yellow') | int(100) < 30
+        }}
+      icon: >
+        {% if is_state('binary_sensor.hp_printer_low_toner', 'on') %}
+          mdi:alert
+        {% else %}
+          mdi:check-circle
+        {% endif %}
+
+- sensor:
+    - name: kantoor_lights_on_count
+      unique_id: kantoor_lights_on_count
+      icon: mdi:lightbulb
+      state: >
+        {% set ignore = label_entities('dontCountAsLight') | list %}
+        {% set ids = area_entities('kantoor')
+          | select('match','^light\\.')
+          | reject('in', ignore)
+          | list %}
+        {{ expand(ids) | selectattr('state','eq','on') | list | count }}
+
+    - name: "HP Toner Black"
+      unique_id: hp_toner_black
+      unit_of_measurement: "%"
+      state: "{{ states('sensor.hp_color_laser_150nw_black_toner_s_n_crum_221114a782f') | int(0) }}"
+
+    - name: "HP Toner Cyan"
+      unique_id: hp_toner_cyan
+      unit_of_measurement: "%"
+      state: "{{ states('sensor.hp_color_laser_150nw_cyan_toner_s_n_crum_221114a7bcf') | int(0) }}"
+
+    - name: "HP Toner Magenta"
+      unique_id: hp_toner_magenta
+      unit_of_measurement: "%"
+      state: "{{ states('sensor.hp_color_laser_150nw_magenta_toner_s_n_crum_221114a727c') | int(0) }}"
+
+    - name: "HP Toner Yellow"
+      unique_id: hp_toner_yellow
+      unit_of_measurement: "%"
+      state: "{{ states('sensor.hp_color_laser_150nw_yellow_toner_s_n_crum_221114a78e5') | int(0) }}"
+
+    - name: "HP Printer Status Clean"
+      unique_id: hp_printer_status_clean
+      state: >
+        {% set s = states('sensor.hp_color_laser_150nw') %}
+        {% if s in ['printing', 'processing'] %} printing
+        {% elif s in ['idle', 'ready'] %} idle
+        {% elif s in ['stopped', 'paused'] %} stopped
+        {% elif s in ['unavailable', 'unknown'] %} offline
+        {% else %} {{ s }}
+        {% endif %}
+
+- trigger:
+    - platform: event
+      event_type: homepod_kantoor_climate
+  sensor:
+    - name: "Kantoor HomePod Temperatuur"
+      unique_id: kantoor_homepod_temperature
+      device_class: temperature
+      state_class: measurement
+      unit_of_measurement: "°C"
+      state: >-
+        {{ (trigger.event.data.temperature | string
+            | regex_findall_index('[-+]?[0-9]*[\\.,]?[0-9]+', 0)
+            | replace(',', '.')
+            | float) }}
+    - name: "Kantoor HomePod Luchtvochtigheid"
+      unique_id: kantoor_homepod_humidity
+      device_class: humidity
+      state_class: measurement
+      unit_of_measurement: "%"
+      state: >-
+        {{ (trigger.event.data.humidity | string
+            | replace(',', '.')
+            | float) }}

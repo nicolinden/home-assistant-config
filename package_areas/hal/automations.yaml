@@ -1,0 +1,59 @@
+- alias: Hal kast - motion aan/uit
+  id: hal_kast_motion_aan_uit
+  mode: single
+
+  trigger:
+    - platform: state
+      entity_id: binary_sensor.hal_motion
+      to: "on"
+      id: motion_on
+
+    - platform: state
+      entity_id: binary_sensor.hal_motion
+      to: "off"
+      for: "00:03:00"
+      id: motion_off
+
+  action:
+    - choose:
+        - conditions:
+            - condition: trigger
+              id: motion_on
+          sequence:
+            - service: light.turn_on
+              target:
+                entity_id: light.hal_kast
+              data:
+                brightness_pct: 70
+                transition: 0.2
+
+        - conditions:
+            - condition: trigger
+              id: motion_off
+          sequence:
+            - service: light.turn_off
+              target:
+                entity_id: light.hal_kast
+              data:
+                transition: 0.5
+
+- id: deurbel_toon_live_view_30s # optioneel maar handig
+  alias: Deurbel - toon live view 30s
+  mode: restart
+  trigger:
+    - platform: event
+      event_type: state_changed
+      event_data:
+        entity_id: event.voordeur_ding
+  condition:
+    # Alleen bij een echte ding (en niet bij HA start)
+    - condition: template
+      value_template: >
+        {{ trigger.event.data.new_state is not none
+           and trigger.event.data.new_state.attributes.event_type == 'ding' }}
+  action:
+    - service: timer.start
+      target:
+        entity_id: timer.deurbel_weergave
+      data:
+        duration: "00:00:30"

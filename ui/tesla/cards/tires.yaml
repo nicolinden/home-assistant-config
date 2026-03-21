@@ -1,0 +1,12 @@
+type: entities
+title: Bandenspanning
+show_header_toggle: false
+entities:
+  - entity: sensor.k_i_t_t_tire_pressure_front_left
+    name: Voor links
+  - entity: sensor.k_i_t_t_tire_pressure_front_right
+    name: Voor rechts
+  - entity: sensor.k_i_t_t_tire_pressure_rear_left
+    name: Achter links
+  - entity: sensor.k_i_t_t_tire_pressure_rear_right
+    name: Achter rechts

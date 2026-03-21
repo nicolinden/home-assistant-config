@@ -1,0 +1,6 @@
+- platform: group
+  name: Kantoor screens
+  unique_id: screens_office_group
+  entities:
+    - cover.kantoor_voor
+    - cover.kantoor_zij
