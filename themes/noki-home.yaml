@@ -1,0 +1,77 @@
+noki-home:
+  modes:
+    light:
+      lovelace-background: "center / cover no-repeat fixed url('/local/backgrounds/bg-light.jpg')"
+      primary-background-color: "#f5f6f8"
+      secondary-background-color: "#eceff3"
+      card-background-color: "rgba(255,255,255,0.72)"
+      ha-card-background: "rgba(255,255,255,0.72)"
+
+      primary-text-color: "#17181a"
+      secondary-text-color: "rgba(23,24,26,0.68)"
+      text-primary-color: "#17181a"
+      disabled-text-color: "rgba(23,24,26,0.38)"
+
+      primary-color: "#7f8ea3"
+      accent-color: "#a88d72"
+
+      divider-color: "rgba(23,24,26,0.08)"
+      border-color: "rgba(23,24,26,0.08)"
+
+      app-header-background-color: "rgba(248,249,251,0.72)"
+      app-header-text-color: "#17181a"
+
+      sidebar-background-color: "rgba(255,255,255,0.58)"
+      sidebar-text-color: "#17181a"
+      sidebar-selected-background-color: "rgba(127,142,163,0.12)"
+      sidebar-selected-text-color: "#17181a"
+      sidebar-icon-color: "rgba(23,24,26,0.70)"
+      sidebar-selected-icon-color: "#7f8ea3"
+
+      state-icon-color: "#7f8ea3"
+      state-icon-active-color: "#b18456"
+
+      paper-item-icon-color: "rgba(23,24,26,0.65)"
+      paper-item-icon-active-color: "#b18456"
+
+      ha-card-border-radius: "24px"
+      ha-card-box-shadow: "0 8px 30px rgba(19, 26, 36, 0.08)"
+      card-mod-theme: bernst
+
+    dark:
+      lovelace-background: "center / cover no-repeat fixed url('/local/backgrounds/bg-dark.jpg')"
+      primary-background-color: "#0b0d10"
+      secondary-background-color: "#13161b"
+      card-background-color: "rgba(20,22,27,0.68)"
+      ha-card-background: "rgba(20,22,27,0.68)"
+
+      primary-text-color: "#f3f4f6"
+      secondary-text-color: "rgba(243,244,246,0.68)"
+      text-primary-color: "#f3f4f6"
+      disabled-text-color: "rgba(243,244,246,0.38)"
+
+      primary-color: "#9aa7bb"
+      accent-color: "#c49a6c"
+
+      divider-color: "rgba(255,255,255,0.08)"
+      border-color: "rgba(255,255,255,0.08)"
+
+      app-header-background-color: "rgba(11,13,16,0.68)"
+      app-header-text-color: "#f3f4f6"
+
+      sidebar-background-color: "rgba(15,17,21,0.58)"
+      sidebar-text-color: "#f3f4f6"
+      sidebar-selected-background-color: "rgba(154,167,187,0.14)"
+      sidebar-selected-text-color: "#ffffff"
+      sidebar-icon-color: "rgba(243,244,246,0.70)"
+      sidebar-selected-icon-color: "#c49a6c"
+
+      state-icon-color: "#9aa7bb"
+      state-icon-active-color: "#d2a06c"
+
+      paper-item-icon-color: "rgba(243,244,246,0.70)"
+      paper-item-icon-active-color: "#d2a06c"
+
+      ha-card-border-radius: "24px"
+      ha-card-box-shadow: "0 12px 36px rgba(0, 0, 0, 0.28)"
+      card-mod-theme: bernst
