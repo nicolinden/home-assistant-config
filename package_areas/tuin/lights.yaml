@@ -8,3 +8,10 @@
     - light.muurlamp_4
     - light.muurlamp_5
     - light.muurlamp_6     
+
+- platform: group
+  name: Tuin Lampen
+  unique_id: tuin_lampen
+  entities:
+    - light.buiten
+    - light.tuin_stopcontact_light

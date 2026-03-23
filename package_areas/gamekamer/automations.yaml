@@ -75,7 +75,7 @@
           sequence:
             - service: scene.turn_on
               target:
-                entity_id: scene.gamekamer_concentreren
+                entity_id: scene.gamekamer_ontspannen
 
     - service: input_boolean.turn_on
       target:
@@ -100,8 +100,6 @@
       target:
         entity_id:
           - light.gamekamer
-          - light.toilet_boven
-          - light.badkamer
 
     - service: input_boolean.turn_off
       target:

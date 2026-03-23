@@ -36,3 +36,16 @@
           | reject('in', ignore)
           | list %}
         {{ ids | count > 0 and (expand(ids) | selectattr('state','eq','on') | list | count > 0) }}
+
+- light:
+    - name: "Tuin Verlichting"
+      unique_id: tuin_stopcontact_light
+      state: "{{ is_state('switch.smart_switch_outlet_1', 'on') }}"
+      turn_on:
+        action: switch.turn_on
+        target:
+          entity_id: switch.smart_switch_outlet_1
+      turn_off:
+        action: switch.turn_off
+        target:
+          entity_id: switch.smart_switch_outlet_1

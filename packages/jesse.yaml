@@ -5,3 +5,5 @@ input_datetime: !include ../package_areas/jesse/input_datetimes.yaml
 script: !include ../package_areas/jesse/scripts.yaml
 switch: !include ../package_areas/jesse/switches.yaml
 automation: !include ../package_areas/jesse/automations.yaml
+light: !include ../package_areas/jesse/lights.yaml
+

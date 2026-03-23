@@ -31,3 +31,38 @@ stuur_bericht_naar_jesse_pc:
             entity_id: input_text.jesse_pc_bericht
           data:
             value: ""
+
+jesse_lampen_toggle_slim:
+  alias: Jesse lampen slim toggle
+  mode: single
+  sequence:
+    - variables:
+        main_lights:
+          - light.ikea_of_sweden_ormanas_led_strip
+          - light.jesse_plafond
+          - light.jesse_vide
+          - light.plug_mini_eu
+          - light.lines_cbe8
+        desk_lamp: light.jesse_bureaulamp_2
+
+    - choose:
+        # ALS alles uit is → AAN zetten (zonder bureaulamp)
+        - conditions:
+            - condition: template
+              value_template: >
+                {{ expand(main_lights + [desk_lamp])
+                    | selectattr('state','eq','on')
+                    | list
+                    | count == 0 }}
+          sequence:
+            - action: light.turn_on
+              target:
+                entity_id: "{{ main_lights }}"
+
+      default:
+        # ANDERS → alles UIT (incl bureaulamp)
+        - action: light.turn_off
+          target:
+            entity_id: >
+              {{ main_lights + [desk_lamp] }}
+

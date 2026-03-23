@@ -6,3 +6,14 @@
     - light.kantoor_dressoir
     - light.psv_lamp
     - light.shapes_11a9
+
+- platform: group
+  name: Kantoor lampen
+  unique_id: office_lights
+  entities:
+    - light.bureau_lightstrip
+    - light.kantoor_dressoir
+    - light.psv_lamp
+    - light.shapes_11a9
+    - light.kantoor_plafond
+
