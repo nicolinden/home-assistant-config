@@ -3,7 +3,7 @@
   unique_id: office_decor_lights
   entities:
     - light.bureau_lightstrip
-    - light.kantoor_dressoir
+    - light.kantoor_bloom
     - light.psv_lamp
     - light.shapes_11a9
 
@@ -12,7 +12,7 @@
   unique_id: office_lights
   entities:
     - light.bureau_lightstrip
-    - light.kantoor_dressoir
+    - light.kantoor_bloom
     - light.psv_lamp
     - light.shapes_11a9
     - light.kantoor_plafond

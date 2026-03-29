@@ -52,10 +52,23 @@
           sequence:
             - service: scene.turn_on
               target:
-                entity_id:
-                  - scene.gamekamer_nacht
-                  - scene.toilet_boven_nachtlampje
-                  - scene.badkamer_nachtlampje
+                entity_id: scene.gamekamer_nacht
+
+            # Badkamer + toilet alleen tussen 23:00 en 05:00
+            - choose:
+                - conditions:
+                    - condition: or
+                      conditions:
+                        - condition: time
+                          after: "23:00:00"
+                        - condition: time
+                          before: "05:00:00"
+                  sequence:
+                    - service: scene.turn_on
+                      target:
+                        entity_id:
+                          - scene.toilet_boven_nachtlampje
+                          - scene.badkamer_nachtlampje
 
         # 08:00 - 15:00
         - conditions:
@@ -96,10 +109,28 @@
       entity_id: input_boolean.gamekamer_motion_active
       state: "on"
 
-    - service: light.turn_off
-      target:
-        entity_id:
-          - light.gamekamer
+    # Tussen 23:00 en 05:00 ook badkamer + toilet uitzetten
+    - choose:
+        - conditions:
+            - condition: or
+              conditions:
+                - condition: time
+                  after: "23:00:00"
+                - condition: time
+                  before: "05:00:00"
+          sequence:
+            - service: light.turn_off
+              target:
+                entity_id:
+                  - light.gamekamer
+                  - light.badkamer
+                  - light.toilet_boven
+
+      default:
+        - service: light.turn_off
+          target:
+            entity_id:
+              - light.gamekamer
 
     - service: input_boolean.turn_off
       target:

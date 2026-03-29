@@ -16,12 +16,26 @@
       delay_off:
         minutes: 2
 
+    - name: "Droger Laag Verbruik"
+      unique_id: droger_laag_verbruik
+      state: >
+        {{ states('sensor.sonoff_s60zbtpf_power_2') | float(0) < 5 }}
+      delay_on:
+        minutes: 5
+
     - name: "Wasmachine Aan"
       unique_id: wasmachine_aan
       state: >
         {{ states('sensor.sonoff_s60zbtpf_power') | float(0) > 10 }}
       delay_off:
         minutes: 2
+
+    - name: "Wasmachine Laag Verbruik"
+      unique_id: wasmachine_laag_verbruik
+      state: >
+        {{ states('sensor.sonoff_s60zbtpf_power') | float(0) < 3 }}
+      delay_on:
+        minutes: 5
 
 - sensor:
     - name: wasruimte_lights_on_count

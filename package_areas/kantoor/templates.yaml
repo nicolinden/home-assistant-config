@@ -74,6 +74,12 @@
         {% else %} {{ s }}
         {% endif %}
 
+    - name: Kantoor in gebruik
+      unique_id: kantoor_in_gebruik
+      device_class: occupancy
+      state: >
+        {{ is_state('binary_sensor.macbookpro', 'on') }}
+
 - trigger:
     - platform: event
       event_type: homepod_kantoor_climate

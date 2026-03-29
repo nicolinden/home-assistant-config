@@ -234,7 +234,7 @@
             target:
               entity_id:
                 - light.bureau_lightstrip
-                - light.kantoor_dressoir
+                - light.kantoor_bloom
                 - light.psv_lamp
                 - light.shapes_11a9
             data:
@@ -284,7 +284,7 @@
             target:
               entity_id:
                 - light.bureau_lightstrip
-                - light.kantoor_dressoir
+                - light.kantoor_bloom
                 - light.psv_lamp
                 - light.shapes_11a9
             data:

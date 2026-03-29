@@ -17,3 +17,75 @@
 #       data:
 #         title: Droger beveiliging
 #         message: "Droger draait nog. Uitschakelen geblokkeerd."
+
+- id: wasmachine_cyclus_gestart
+  alias: Wasmachine cyclus gestart
+  mode: single
+  trigger:
+    - platform: state
+      entity_id: binary_sensor.wasmachine_aan
+      to: "on"
+  action:
+    - service: input_boolean.turn_on
+      target:
+        entity_id: input_boolean.wasmachine_heeft_gedraaid
+
+- id: wasmachine_klaar
+  alias: Wasmachine klaar
+  mode: single
+  trigger:
+    - platform: state
+      entity_id: binary_sensor.wasmachine_laag_verbruik
+      to: "on"
+  condition:
+    - condition: state
+      entity_id: input_boolean.wasmachine_heeft_gedraaid
+      state: "on"
+    - condition: state
+      entity_id: binary_sensor.wasmachine_aan
+      state: "off"
+  action:
+    - service: notify.mobile_app_iphone_15_pro_max
+      data:
+        title: ✅ Wasmachine klaar
+        message: >-
+          Klaar om {{ now().strftime('%H:%M') }}.
+    - service: input_boolean.turn_off
+      target:
+        entity_id: input_boolean.wasmachine_heeft_gedraaid
+
+- id: droger_cyclus_gestart
+  alias: Droger cyclus gestart
+  mode: single
+  trigger:
+    - platform: state
+      entity_id: binary_sensor.droger_aan
+      to: "on"
+  action:
+    - service: input_boolean.turn_on
+      target:
+        entity_id: input_boolean.droger_heeft_gedraaid
+
+- id: droger_klaar
+  alias: Droger klaar
+  mode: single
+  trigger:
+    - platform: state
+      entity_id: binary_sensor.droger_laag_verbruik
+      to: "on"
+  condition:
+    - condition: state
+      entity_id: input_boolean.droger_heeft_gedraaid
+      state: "on"
+    - condition: state
+      entity_id: binary_sensor.droger_aan
+      state: "off"
+  action:
+    - service: notify.mobile_app_iphone_15_pro_max
+      data:
+        title: ✅ Droger klaar
+        message: >-
+          Klaar om {{ now().strftime('%H:%M') }}.
+    - service: input_boolean.turn_off
+      target:
+        entity_id: input_boolean.droger_heeft_gedraaid
