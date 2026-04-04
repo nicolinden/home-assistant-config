@@ -31,6 +31,20 @@
           mdi:check-circle
         {% endif %}
 
+- binary_sensor:
+    - name: Kantoor in gebruik
+      default_entity_id: binary_sensor.kantoor_in_gebruik
+      unique_id: kantoor_in_gebruik
+      device_class: occupancy
+      state: >
+        {{
+          (
+            is_state('binary_sensor.macbookpro', 'on')
+            or is_state('binary_sensor.macbookpro_wifi', 'on')
+          )
+          and is_state('input_boolean.macbook_sleep_in_progress', 'off')
+        }}
+
 - sensor:
     - name: kantoor_lights_on_count
       unique_id: kantoor_lights_on_count
@@ -73,12 +87,6 @@
         {% elif s in ['unavailable', 'unknown'] %} offline
         {% else %} {{ s }}
         {% endif %}
-
-    - name: Kantoor in gebruik
-      unique_id: kantoor_in_gebruik
-      device_class: occupancy
-      state: >
-        {{ is_state('binary_sensor.macbookpro', 'on') }}
 
 - trigger:
     - platform: event

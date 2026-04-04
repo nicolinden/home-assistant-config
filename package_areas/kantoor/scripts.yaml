@@ -1,0 +1,81 @@
+macbook_sleep:
+  alias: Zet MacBook in slaap
+  sequence:
+    - action: input_boolean.turn_on
+      target:
+        entity_id: input_boolean.macbook_sleep_in_progress
+
+    - action: shell_command.macbook_sleep
+
+    - delay: "00:02:00"
+
+    - action: input_boolean.turn_off
+      target:
+        entity_id: input_boolean.macbook_sleep_in_progress
+
+kantoor_mode_work:
+  alias: Kantoor mode - Work
+  icon: mdi:briefcase
+  mode: restart
+  sequence:
+    - action: input_boolean.turn_on
+      target:
+        entity_id: input_boolean.kantoor_work_mode
+
+    - action: scene.turn_on
+      target:
+        entity_id: scene.kantoor_kantoor_sfeer
+
+    - action: media_player.media_play
+      target:
+        entity_id: media_player.kantoor_homepod
+
+    - action: light.turn_on
+      target:
+        entity_id: light.shapes_11a9
+      data:
+        effect: "Neon Tokyo"
+
+kantoor_mode_teamscall:
+  alias: Kantoor mode - Teamscall
+  icon: mdi:video
+  mode: restart
+  sequence:
+    - action: input_boolean.turn_on
+      target:
+        entity_id: input_boolean.kantoor_work_mode
+
+    - action: scene.turn_on
+      target:
+        entity_id: scene.kantoor_kantoor_sfeer
+
+    - action: media_player.media_pause
+      target:
+        entity_id: media_player.kantoor_homepod
+
+    - action: light.turn_on
+      target:
+        entity_id: light.shapes_11a9
+      data:
+        effect: "Energize"
+
+kantoor_mode_night:
+  alias: Kantoor mode - Night
+  icon: mdi:weather-night
+  mode: restart
+  sequence:
+    - action: input_boolean.turn_off
+      target:
+        entity_id: input_boolean.kantoor_work_mode
+
+    - action: scene.turn_on
+      target:
+        entity_id: scene.kantoor_nachtlampje
+
+    - action: media_player.media_pause
+      target:
+        entity_id: media_player.kantoor_homepod
+
+    - action: light.turn_off
+      target:
+        entity_id: light.shapes_11a9

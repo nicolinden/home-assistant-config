@@ -304,3 +304,178 @@
     - service: input_boolean.turn_off
       target:
         entity_id: input_boolean.kantoor_dim_decor_down
+
+- alias: Kantoor - camera volgt workmode
+  id: kantoor_camera_volgt_workmode
+  mode: restart
+  triggers:
+    - trigger: state
+      entity_id: input_boolean.kantoor_work_mode
+      to: "on"
+    - trigger: state
+      entity_id: input_boolean.kantoor_work_mode
+      to: "off"
+  actions:
+    - choose:
+        - conditions:
+            - condition: state
+              entity_id: input_boolean.kantoor_work_mode
+              state: "on"
+          sequence:
+            - action: switch.turn_off
+              target:
+                entity_id: switch.kantoor_camera
+        - conditions:
+            - condition: state
+              entity_id: input_boolean.kantoor_work_mode
+              state: "off"
+          sequence:
+            - action: switch.turn_on
+              target:
+                entity_id: switch.kantoor_camera
+
+- alias: Kantoor - deur open zet juiste mode
+  id: kantoor_door_open_zet_juiste_mode
+  mode: restart
+  triggers:
+    - trigger: state
+      entity_id: binary_sensor.kantoor_door
+      to: "on"
+  actions:
+    - choose:
+        - conditions:
+            - condition: time
+              after: "07:30:00"
+              before: "19:01:00"
+          sequence:
+            - action: scene.turn_on
+              target:
+                entity_id: scene.kantoor_kantoor_sfeer
+            - action: light.turn_on
+              target:
+                entity_id: light.shapes_11a9
+              data:
+                effect: "Neon Tokyo"
+        - conditions:
+            - condition: or
+              conditions:
+                - condition: time
+                  after: "19:01:00"
+                - condition: time
+                  before: "07:30:00"
+          sequence:
+            - action: scene.turn_on
+              target:
+                entity_id: scene.kantoor_nachtlampje
+            - action: light.turn_off
+              target:
+                entity_id: light.shapes_11a9
+
+- alias: Kantoor - deur dicht en geen workmode is alles uit
+  id: kantoor_door_dicht_geen_workmode_alles_uit
+  mode: restart
+  triggers:
+    - trigger: state
+      entity_id: binary_sensor.kantoor_door
+      to: "off"
+  conditions:
+    - condition: state
+      entity_id: input_boolean.kantoor_work_mode
+      state: "off"
+  actions:
+    - variables:
+        kantoor_lights: >-
+          {{
+            area_entities('Kantoor')
+            | select('match', '^light\.')
+            | list
+          }}
+        excluded_lights: >-
+          {{
+            label_entities('dontCountAsLight')
+            | select('match', '^light\.')
+            | list
+          }}
+        lights_to_turn_off: >-
+          {{
+            kantoor_lights
+            | reject('in', excluded_lights)
+            | list
+          }}
+    - if:
+        - condition: template
+          value_template: "{{ lights_to_turn_off | count > 0 }}"
+      then:
+        - action: light.turn_off
+          target:
+            entity_id: "{{ lights_to_turn_off }}"
+    - action: media_player.media_pause
+      target:
+        entity_id: media_player.kantoor_homepod
+
+    - action: light.turn_off
+      target:
+        entity_id: light.shapes_11a9
+
+    - delay: "00:00:01"
+
+    - action: light.turn_off
+      target:
+        entity_id: light.shapes_11a9        
+
+    - action: script.macbook_sleep
+
+- alias: Kantoor - Hue Tap bediening
+  id: kantoor_hue_tap_bediening
+  mode: queued
+  max: 10
+  triggers:
+    - trigger: state
+      entity_id: event.kantoor_tap_switch_button_1
+    - trigger: state
+      entity_id: event.kantoor_tap_switch_button_2
+    - trigger: state
+      entity_id: event.kantoor_tap_switch_button_3
+    - trigger: state
+      entity_id: event.kantoor_tap_switch_button_4
+  variables:
+    button: "{{ trigger.entity_id }}"
+  actions:
+    - choose:
+        - conditions:
+            - condition: template
+              value_template: "{{ button == 'event.kantoor_tap_switch_button_1' }}"
+          sequence:
+            - action: script.kantoor_mode_work
+
+        - conditions:
+            - condition: template
+              value_template: "{{ button == 'event.kantoor_tap_switch_button_2' }}"
+          sequence:
+            - action: script.kantoor_mode_teamscall
+
+        - conditions:
+            - condition: template
+              value_template: "{{ button == 'event.kantoor_tap_switch_button_3' }}"
+          sequence:
+            - choose:
+                - conditions:
+                    - condition: state
+                      entity_id: media_player.kantoor_homepod
+                      state: "playing"
+                  sequence:
+                    - action: media_player.media_pause
+                      target:
+                        entity_id: media_player.kantoor_homepod
+              default:
+                - action: media_player.media_play
+                  target:
+                    entity_id: media_player.kantoor_homepod
+
+        - conditions:
+            - condition: template
+              value_template: "{{ button == 'event.kantoor_tap_switch_button_4' }}"
+          sequence:
+            - action: input_boolean.turn_off
+              target:
+                entity_id: input_boolean.kantoor_work_mode

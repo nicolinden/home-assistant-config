@@ -34,53 +34,53 @@
               data:
                 transition: 0
 
-- alias: Keukentafel - ochtend 15%
-  id: keukentafel_ochtend_15
-  mode: single
+# - alias: Keukentafel - ochtend 15%
+#   id: keukentafel_ochtend_15
+#   mode: single
 
-  trigger:
-    - platform: time
-      at: "06:30:00"
-      id: weekday
+#   trigger:
+#     - platform: time
+#       at: "06:30:00"
+#       id: weekday
 
-    - platform: time
-      at: "07:30:00"
-      id: weekend
+#     - platform: time
+#       at: "07:30:00"
+#       id: weekend
 
-  action:
-    - choose:
-        # Doordeweeks 06:30
-        - conditions:
-            - condition: trigger
-              id: weekday
-            - condition: time
-              weekday:
-                - mon
-                - tue
-                - wed
-                - thu
-                - fri
-          sequence:
-            - service: scene.turn_on
-              target:
-                entity_id: scene.keuken_ochtend_15
-              data:
-                transition: 1
+#   action:
+#     - choose:
+#         # Doordeweeks 06:30
+#         - conditions:
+#             - condition: trigger
+#               id: weekday
+#             - condition: time
+#               weekday:
+#                 - mon
+#                 - tue
+#                 - wed
+#                 - thu
+#                 - fri
+#           sequence:
+#             - service: scene.turn_on
+#               target:
+#                 entity_id: scene.keuken_ochtend_15
+#               data:
+#                 transition: 1
 
-        # Weekend 07:30
-        - conditions:
-            - condition: trigger
-              id: weekend
-            - condition: time
-              weekday:
-                - sat
-                - sun
-          sequence:
-            - service: scene.turn_on
-              target:
-                entity_id: scene.keuken_ochtend_15
-              data:
-                transition: 1
+#         # Weekend 07:30
+#         - conditions:
+#             - condition: trigger
+#               id: weekend
+#             - condition: time
+#               weekday:
+#                 - sat
+#                 - sun
+#           sequence:
+#             - service: scene.turn_on
+#               target:
+#                 entity_id: scene.keuken_ochtend_15
+#               data:
+#                 transition: 1
 
 - alias: Keuken - bij thuiskomst na zonsondergang
   id: keuken_bij_thuiskomst_na_zonsondergang

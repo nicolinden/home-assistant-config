@@ -1,41 +1,26 @@
-- alias: Hal kast - motion aan/uit
-  id: hal_kast_motion_aan_uit
-  mode: single
-
+- id: hal_kast_aan_bij_deur_open
+  alias: Hal kast aan bij deur open
   trigger:
     - platform: state
-      entity_id: binary_sensor.hal_motion
+      entity_id: binary_sensor.deursensor
       to: "on"
-      id: motion_on
-
-    - platform: state
-      entity_id: binary_sensor.hal_motion
-      to: "off"
-      for: "00:03:00"
-      id: motion_off
-
   action:
-    - choose:
-        - conditions:
-            - condition: trigger
-              id: motion_on
-          sequence:
-            - service: light.turn_on
-              target:
-                entity_id: light.hal_kast
-              data:
-                brightness_pct: 70
-                transition: 0.2
+    - service: light.turn_on
+      target:
+        entity_id: light.hal_kast
+  mode: single
 
-        - conditions:
-            - condition: trigger
-              id: motion_off
-          sequence:
-            - service: light.turn_off
-              target:
-                entity_id: light.hal_kast
-              data:
-                transition: 0.5
+- id: hal_kast_uit_bij_deur_dicht
+  alias: Hal kast uit bij deur dicht
+  trigger:
+    - platform: state
+      entity_id: binary_sensor.deursensor
+      to: "off"
+  action:
+    - service: light.turn_off
+      target:
+        entity_id: light.hal_kast
+  mode: single
 
 - id: deurbel_toon_live_view_30s # optioneel maar handig
   alias: Deurbel - toon live view 30s

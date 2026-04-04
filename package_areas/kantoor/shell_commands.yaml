@@ -1,0 +1,2 @@
+macbook_sleep: >-
+  ssh -i /config/.ssh/id_ed25519 -o StrictHostKeyChecking=no nico@10.0.1.3 "pmset sleepnow"

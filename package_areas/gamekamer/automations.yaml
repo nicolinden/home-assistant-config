@@ -19,7 +19,7 @@
 
   action:
     - choose:
-        # Work mode aangezet -> alles direct stoppen / blokkeren
+        # Work mode aangezet -> automation direct stoppen / blokkeren
         - conditions:
             - condition: trigger
               id: work_mode_on
@@ -39,7 +39,15 @@
       entity_id: binary_sensor.gameroom_sensor_motion
       state: "on"
 
-    # Scene altijd opnieuw toepassen
+    # Alleen actief buiten 08:00 - 16:00
+    - condition: or
+      conditions:
+        - condition: time
+          before: "08:00:00"
+        - condition: time
+          after: "16:00:00"
+
+    # Scene opnieuw toepassen op basis van tijd
     - choose:
         # 21:00 - 08:00
         - conditions:
@@ -54,36 +62,10 @@
               target:
                 entity_id: scene.gamekamer_nacht
 
-            # Badkamer + toilet alleen tussen 23:00 en 05:00
-            - choose:
-                - conditions:
-                    - condition: or
-                      conditions:
-                        - condition: time
-                          after: "23:00:00"
-                        - condition: time
-                          before: "05:00:00"
-                  sequence:
-                    - service: scene.turn_on
-                      target:
-                        entity_id:
-                          - scene.toilet_boven_nachtlampje
-                          - scene.badkamer_nachtlampje
-
-        # 08:00 - 15:00
+        # 16:00 - 21:00
         - conditions:
             - condition: time
-              after: "08:00:00"
-              before: "15:00:00"
-          sequence:
-            - service: scene.turn_on
-              target:
-                entity_id: scene.gamekamer_ontspannen
-
-        # 15:00 - 21:00
-        - conditions:
-            - condition: time
-              after: "15:00:00"
+              after: "16:00:00"
               before: "21:00:00"
           sequence:
             - service: scene.turn_on
@@ -109,28 +91,9 @@
       entity_id: input_boolean.gamekamer_motion_active
       state: "on"
 
-    # Tussen 23:00 en 05:00 ook badkamer + toilet uitzetten
-    - choose:
-        - conditions:
-            - condition: or
-              conditions:
-                - condition: time
-                  after: "23:00:00"
-                - condition: time
-                  before: "05:00:00"
-          sequence:
-            - service: light.turn_off
-              target:
-                entity_id:
-                  - light.gamekamer
-                  - light.badkamer
-                  - light.toilet_boven
-
-      default:
-        - service: light.turn_off
-          target:
-            entity_id:
-              - light.gamekamer
+    - service: light.turn_off
+      target:
+        entity_id: light.gamekamer
 
     - service: input_boolean.turn_off
       target:

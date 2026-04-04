@@ -17,3 +17,10 @@ kantoor_dim_decor_down:
 homepod_push_kantoor:
   name: Homepod push kantoor
   icon: mdi:thermometer
+
+macbook_sleep_in_progress:
+  name: MacBook sleep in progress
+
+kantoor_work_mode:
+  name: Kantoor work mode
+  icon: mdi:briefcase

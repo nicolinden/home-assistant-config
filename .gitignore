@@ -9,6 +9,7 @@ secrets.yaml
 *.crt
 *.p12
 *.pfx
+.ssh/
 
 # ---- Home Assistant runtime/state ----
 .storage/

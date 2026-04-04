@@ -3,3 +3,5 @@ input_boolean: !include ../package_areas/kantoor/input_booleans.yaml
 template: !include ../package_areas/kantoor/templates.yaml
 light: !include ../package_areas/kantoor/lights.yaml
 automation: !include ../package_areas/kantoor/automations.yaml
+shell_command: !include ../package_areas/kantoor/shell_commands.yaml
+script: !include ../package_areas/kantoor/scripts.yaml
