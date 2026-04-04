@@ -1,3 +1,4 @@
 template: !include ../package_areas/overloop/templates.yaml
 automation: !include ../package_areas/overloop/automations.yaml
 input_boolean: !include ../package_areas/overloop/input_booleans.yaml
+timer: !include ../package_areas/overloop/timers.yaml

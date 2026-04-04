@@ -1,3 +1,4 @@
 overloop_nachtlamp_actief:
-  name: Overloop nachtverlichting actief
+  name: Overloop nachtlamp actief
   icon: mdi:motion-sensor-night
+  initial: false
