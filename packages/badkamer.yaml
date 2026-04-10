@@ -1,2 +1,9 @@
 light: !include ../package_areas/badkamer/lights.yaml
 template: !include ../package_areas/badkamer/templates.yaml
+input_boolean: !include ../package_areas/badkamer/input_booleans.yaml
+input_number: !include ../package_areas/badkamer/input_numbers.yaml
+timer: !include ../package_areas/badkamer/timers.yaml
+automation: !include ../package_areas/badkamer/automations.yaml
+sensor: !include ../package_areas/badkamer/sensors.yaml
+input_datetime: !include ../package_areas/badkamer/input_datetimes.yaml
+script: !include ../package_areas/badkamer/scripts.yaml

@@ -4,10 +4,34 @@
       state: >
         {% set ignore = label_entities('dontCountAsLight') | list %}
         {% set ids = area_entities('badkamer')
-          | select('match','^light\\.')
+          | select('match', '^light\\.')
           | reject('in', ignore)
           | list %}
-        {{ ids | count > 0 and (expand(ids) | selectattr('state','eq','on') | list | count > 0) }}
+        {{ ids | count > 0 and (expand(ids) | selectattr('state', 'eq', 'on') | list | count > 0) }}
+
+    - name: Badkamer humidity stijgt
+      unique_id: badkamer_humidity_stijgt
+      state: >
+        {{ states('sensor.badkamer_humidity_delta') | float(0) > 0.15 }}
+
+    - name: Badkamer humidity daalt
+      unique_id: badkamer_humidity_daalt
+      state: >
+        {{ states('sensor.badkamer_humidity_delta') | float(0) < 0.02 }}
+
+    - name: Badkamer water lijkt op douche
+      unique_id: badkamer_water_lijkt_op_douche
+      state: >
+        {% set current = states('sensor.watermeter_water_usage') | float(0) %}
+        {% set shower_flow = states('input_number.badkamer_douche_verwachte_flow') | float(6) %}
+        {{ current >= shower_flow }}
+
+    - name: Badkamer doucheflow weggevallen
+      unique_id: badkamer_doucheflow_weggevallen
+      state: >
+        {% set current = states('sensor.watermeter_water_usage') | float(0) %}
+        {% set shower_flow = states('input_number.badkamer_douche_verwachte_flow') | float(6) %}
+        {{ current < (shower_flow * 0.7) }}
 
 - sensor:
     - name: badkamer_lights_on_count
@@ -16,7 +40,40 @@
       state: >
         {% set ignore = label_entities('dontCountAsLight') | list %}
         {% set ids = area_entities('badkamer')
-          | select('match','^light\\.')
+          | select('match', '^light\\.')
           | reject('in', ignore)
           | list %}
-        {{ expand(ids) | selectattr('state','eq','on') | list | count }}
+        {{ expand(ids) | selectattr('state', 'eq', 'on') | list | count }}
+
+    - name: badkamer_douche_duur_echt_weergave
+      unique_id: badkamer_douche_duur_echt_weergave
+      icon: mdi:timer
+      state: >
+        {% set start = states('input_datetime.badkamer_douche_starttijd') %}
+        {% if is_state('input_boolean.badkamer_douchen', 'on')
+              and start not in ['unknown', 'unavailable', '', none] %}
+          {% set start_dt = as_datetime(start) %}
+          {% if start_dt %}
+            {% set diff = (now() - start_dt).total_seconds() | int(0) %}
+            {% set m = (diff // 60) | int %}
+            {% set s = (diff % 60) | int %}
+            {{ '%02d:%02d' % (m, s) }}
+          {% else %}
+            00:00
+          {% endif %}
+        {% else %}
+          00:00
+        {% endif %}
+
+    - name: badkamer_douche_waterverbruik
+      unique_id: badkamer_douche_waterverbruik
+      unit_of_measurement: "L"
+      icon: mdi:water
+      state: >
+        {% if is_state('input_boolean.badkamer_douchen', 'on') %}
+          {% set start = states('input_number.badkamer_douche_start_water') | float(0) %}
+          {% set current = states('sensor.watermeter_total_water_usage') | float(0) %}
+          {{ [((current - start) * 1000), 0] | max | round(1) }}
+        {% else %}
+          0
+        {% endif %}

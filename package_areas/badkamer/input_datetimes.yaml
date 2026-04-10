@@ -1,0 +1,4 @@
+badkamer_douche_starttijd:
+  name: Badkamer douche starttijd
+  has_date: true
+  has_time: true

@@ -1,0 +1,14 @@
+badkamer_douche_reset:
+  alias: Badkamer douche reset
+  sequence:
+    - service: input_boolean.turn_off
+      target:
+        entity_id: input_boolean.badkamer_douchen
+    - service: timer.cancel
+      target:
+        entity_id: timer.badkamer_douche
+    - service: input_number.set_value
+      target:
+        entity_id: input_number.badkamer_douche_start_water
+      data:
+        value: 0

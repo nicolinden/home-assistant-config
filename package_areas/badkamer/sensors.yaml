@@ -1,0 +1,7 @@
+- platform: derivative
+  source: sensor.temp_sensor_humidity
+  name: badkamer_humidity_delta
+  unique_id: badkamer_humidity_delta
+  unit_time: min
+  time_window: "00:05:00"
+  round: 3

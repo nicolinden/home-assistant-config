@@ -1,0 +1,141 @@
+- id: badkamer_douche_start
+  alias: Badkamer - Douche start detectie
+  mode: single
+  trigger:
+    - platform: state
+      entity_id: binary_sensor.badkamer_water_lijkt_op_douche
+      to: "on"
+      for: "00:00:20"
+
+  condition:
+    - condition: state
+      entity_id: input_boolean.badkamer_douchen
+      state: "off"
+    - condition: state
+      entity_id: binary_sensor.badkamer_lights_on
+      state: "on"
+    - condition: state
+      entity_id: binary_sensor.badkamer_humidity_stijgt
+      state: "on"
+
+  action:
+    - service: input_boolean.turn_on
+      target:
+        entity_id: input_boolean.badkamer_douchen
+
+    - service: input_datetime.set_datetime
+      target:
+        entity_id: input_datetime.badkamer_douche_starttijd
+      data:
+        datetime: "{{ now().strftime('%Y-%m-%d %H:%M:%S') }}"
+
+    - service: input_number.set_value
+      target:
+        entity_id: input_number.badkamer_douche_start_water
+      data:
+        value: "{{ states('sensor.watermeter_total_water_usage') | float(0) }}"
+
+    - service: timer.start
+      target:
+        entity_id: timer.badkamer_douche
+      data:
+        duration: >
+          00:{{ '%02d' % (states('input_number.badkamer_douche_duur') | int(10)) }}:00
+
+    - service: notify.mobile_app_iphone_15_pro_max
+      data:
+        title: Douche gestart
+        message: >
+          Douche detectie actief. Verwachte flow:
+          {{ states('input_number.badkamer_douche_verwachte_flow') }} L/min.
+
+
+- id: badkamer_douche_timer_restart
+  alias: Badkamer - Douche timer herstart
+  mode: restart
+  trigger:
+    - platform: state
+      entity_id:
+        - sensor.watermeter_water_usage
+        - binary_sensor.badkamer_lights_on
+
+  condition:
+    - condition: state
+      entity_id: input_boolean.badkamer_douchen
+      state: "on"
+    - condition: state
+      entity_id: binary_sensor.badkamer_lights_on
+      state: "on"
+    - condition: state
+      entity_id: binary_sensor.badkamer_water_lijkt_op_douche
+      state: "on"
+
+  action:
+    - service: timer.start
+      target:
+        entity_id: timer.badkamer_douche
+      data:
+        duration: >
+          00:{{ '%02d' % (states('input_number.badkamer_douche_duur') | int(10)) }}:00
+
+
+- id: badkamer_douche_stop
+  alias: Badkamer - Douche stop detectie
+  mode: single
+  trigger:
+    - platform: event
+      event_type: timer.finished
+      event_data:
+        entity_id: timer.badkamer_douche
+      id: timer_finished
+
+    - platform: state
+      entity_id: binary_sensor.badkamer_lights_on
+      to: "off"
+      for: "00:00:10"
+      id: lights_off
+
+  condition:
+    - condition: state
+      entity_id: input_boolean.badkamer_douchen
+      state: "on"
+    - condition: or
+      conditions:
+        - condition: and
+          conditions:
+            - condition: trigger
+              id: timer_finished
+            - condition: state
+              entity_id: timer.badkamer_douche
+              state: "idle"
+            - condition: state
+              entity_id: binary_sensor.badkamer_doucheflow_weggevallen
+              state: "on"
+
+        - condition: trigger
+          id: lights_off
+
+  action:
+    - variables:
+        douche_duur: "{{ states('sensor.badkamer_douche_duur_echt_weergave') }}"
+        water_verbruik: "{{ states('sensor.badkamer_douche_waterverbruik') }}"
+
+    - service: notify.mobile_app_iphone_15_pro_max
+      data:
+        title: Douche klaar
+        message: >
+          Douche duur: {{ douche_duur }} · Waterverbruik: {{ water_verbruik }} L
+
+    - service: input_boolean.turn_off
+      target:
+        entity_id: input_boolean.badkamer_douchen
+
+    - service: timer.cancel
+      target:
+        entity_id: timer.badkamer_douche
+
+    - service: input_number.set_value
+      target:
+        entity_id: input_number.badkamer_douche_start_water
+      data:
+        value: 0

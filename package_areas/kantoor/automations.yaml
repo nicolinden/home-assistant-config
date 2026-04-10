@@ -378,52 +378,89 @@
     - trigger: state
       entity_id: binary_sensor.kantoor_door
       to: "off"
-  conditions:
-    - condition: state
+      id: door_closed
+
+    - trigger: state
+      entity_id: binary_sensor.kantoor_door
+      to: "on"
+      id: door_opened
+
+    - trigger: state
       entity_id: input_boolean.kantoor_work_mode
-      state: "off"
+      to: "on"
+      id: workmode_on
+
   actions:
-    - variables:
-        kantoor_lights: >-
-          {{
-            area_entities('Kantoor')
-            | select('match', '^light\.')
-            | list
-          }}
-        excluded_lights: >-
-          {{
-            label_entities('dontCountAsLight')
-            | select('match', '^light\.')
-            | list
-          }}
-        lights_to_turn_off: >-
-          {{
-            kantoor_lights
-            | reject('in', excluded_lights)
-            | list
-          }}
-    - if:
-        - condition: template
-          value_template: "{{ lights_to_turn_off | count > 0 }}"
-      then:
-        - action: light.turn_off
-          target:
-            entity_id: "{{ lights_to_turn_off }}"
-    - action: media_player.media_pause
-      target:
-        entity_id: media_player.kantoor_homepod
+    - choose:
+        - conditions:
+            - condition: trigger
+              id: door_closed
+          sequence:
+            - delay: "00:00:30"
 
-    - action: light.turn_off
-      target:
-        entity_id: light.shapes_11a9
+            - condition: state
+              entity_id: binary_sensor.kantoor_door
+              state: "off"
 
-    - delay: "00:00:01"
+            - condition: state
+              entity_id: input_boolean.kantoor_work_mode
+              state: "off"
 
-    - action: light.turn_off
-      target:
-        entity_id: light.shapes_11a9        
+            - variables:
+                kantoor_lights: >-
+                  {{
+                    area_entities('Kantoor')
+                    | select('match', '^light\.')
+                    | list
+                  }}
+                excluded_lights: >-
+                  {{
+                    label_entities('dontCountAsLight')
+                    | select('match', '^light\.')
+                    | list
+                  }}
+                lights_to_turn_off: >-
+                  {{
+                    kantoor_lights
+                    | reject('in', excluded_lights)
+                    | list
+                  }}
 
-    - action: script.macbook_sleep
+            - if:
+                - condition: template
+                  value_template: "{{ lights_to_turn_off | count > 0 }}"
+              then:
+                - action: light.turn_off
+                  target:
+                    entity_id: "{{ lights_to_turn_off }}"
+
+            - action: media_player.media_pause
+              target:
+                entity_id: media_player.kantoor_homepod
+
+            - action: light.turn_off
+              target:
+                entity_id: light.shapes_11a9
+
+            - delay: "00:00:01"
+
+            - action: light.turn_off
+              target:
+                entity_id: light.shapes_11a9
+
+            - delay: "00:00:05"
+    
+            - action: script.macbook_sleep
+
+        - conditions:
+            - condition: trigger
+              id: door_opened
+          sequence: []
+
+        - conditions:
+            - condition: trigger
+              id: workmode_on
+          sequence: []
 
 - alias: Kantoor - Hue Tap bediening
   id: kantoor_hue_tap_bediening
@@ -476,6 +513,16 @@
             - condition: template
               value_template: "{{ button == 'event.kantoor_tap_switch_button_4' }}"
           sequence:
-            - action: input_boolean.turn_off
-              target:
-                entity_id: input_boolean.kantoor_work_mode
+            - choose:
+                - conditions:
+                    - condition: state
+                      entity_id: input_boolean.kantoor_work_mode
+                      state: "on"
+                  sequence:
+                    - action: input_boolean.turn_off
+                      target:
+                        entity_id: input_boolean.kantoor_work_mode
+              default:
+                - action: input_boolean.turn_on
+                  target:
+                    entity_id: input_boolean.kantoor_work_mode
