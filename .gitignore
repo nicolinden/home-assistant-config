@@ -17,6 +17,7 @@ secrets.yaml
 .ha_run.lock
 
 # ---- Databases ----
+home-assistant_v2.db*
 *.db
 *.db-shm
 *.db-wal

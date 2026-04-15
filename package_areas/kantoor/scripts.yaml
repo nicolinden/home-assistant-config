@@ -28,7 +28,7 @@ kantoor_mode_work:
 
     - action: media_player.media_play
       target:
-        entity_id: media_player.kantoor_homepod
+        entity_id: media_player.kantoor_homepods
 
     - action: light.turn_on
       target:
@@ -51,7 +51,7 @@ kantoor_mode_teamscall:
 
     - action: media_player.media_pause
       target:
-        entity_id: media_player.kantoor_homepod
+        entity_id: media_player.kantoor_homepods
 
     - action: light.turn_on
       target:
@@ -74,8 +74,44 @@ kantoor_mode_night:
 
     - action: media_player.media_pause
       target:
-        entity_id: media_player.kantoor_homepod
+        entity_id: media_player.kantoor_homepods
 
     - action: light.turn_off
       target:
         entity_id: light.shapes_11a9
+
+kantoor_toggle_media:
+  alias: Kantoor - Toggle media
+  icon: mdi:play-pause
+  mode: restart
+  sequence:
+    - if:
+        - condition: state
+          entity_id: media_player.kantoor_homepods
+          state: "playing"
+      then:
+        - action: media_player.media_pause
+          target:
+            entity_id: media_player.kantoor_homepods
+      else:
+        - action: media_player.media_play
+          target:
+            entity_id: media_player.kantoor_homepods
+
+kantoor_toggle_work_mode:
+  alias: Kantoor - Toggle work mode
+  icon: mdi:toggle-switch
+  mode: restart
+  sequence:
+    - if:
+        - condition: state
+          entity_id: input_boolean.kantoor_work_mode
+          state: "on"
+      then:
+        - action: input_boolean.turn_off
+          target:
+            entity_id: input_boolean.kantoor_work_mode
+      else:
+        - action: input_boolean.turn_on
+          target:
+            entity_id: input_boolean.kantoor_work_mode
