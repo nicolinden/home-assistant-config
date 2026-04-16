@@ -74,7 +74,7 @@
 #   action:
 #     - service: scene.turn_on
 #       target:
-#         entity_id: scene.kantoor_kantoor_sfeer
+#         entity_id: scene.kantoor_kleur_werk_sfeer
 #     - service: light.turn_on
 #       target:
 #         entity_id: light.shapes_11a9
@@ -341,6 +341,10 @@
     - trigger: state
       entity_id: binary_sensor.kantoor_door
       to: "on"
+  conditions:
+    - condition: state
+      entity_id: input_boolean.kantoor_work_mode
+      state: "off"
   actions:
     - choose:
         - conditions:
@@ -350,7 +354,7 @@
           sequence:
             - action: scene.turn_on
               target:
-                entity_id: scene.kantoor_kantoor_sfeer
+                entity_id: scene.kantoor_kleur_werk_sfeer
             - action: light.turn_on
               target:
                 entity_id: light.shapes_11a9
@@ -378,89 +382,63 @@
     - trigger: state
       entity_id: binary_sensor.kantoor_door
       to: "off"
-      id: door_closed
-
-    - trigger: state
-      entity_id: binary_sensor.kantoor_door
-      to: "on"
-      id: door_opened
-
-    - trigger: state
-      entity_id: input_boolean.kantoor_work_mode
-      to: "on"
-      id: workmode_on
 
   actions:
-    - choose:
-        - conditions:
-            - condition: trigger
-              id: door_closed
-          sequence:
-            - delay: "00:00:30"
+    - delay: "00:00:30"
 
-            - condition: state
-              entity_id: binary_sensor.kantoor_door
-              state: "off"
+    - condition: state
+      entity_id: binary_sensor.kantoor_door
+      state: "off"
 
-            - condition: state
-              entity_id: input_boolean.kantoor_work_mode
-              state: "off"
+    - condition: state
+      entity_id: input_boolean.kantoor_work_mode
+      state: "off"
 
-            - variables:
-                kantoor_lights: >-
-                  {{
-                    area_entities('Kantoor')
-                    | select('match', '^light\.')
-                    | list
-                  }}
-                excluded_lights: >-
-                  {{
-                    label_entities('dontCountAsLight')
-                    | select('match', '^light\.')
-                    | list
-                  }}
-                lights_to_turn_off: >-
-                  {{
-                    kantoor_lights
-                    | reject('in', excluded_lights)
-                    | list
-                  }}
+    - variables:
+        kantoor_lights: >-
+          {{
+            area_entities('Kantoor')
+            | select('match', '^light\.')
+            | list
+          }}
+        excluded_lights: >-
+          {{
+            label_entities('dontCountAsLight')
+            | select('match', '^light\.')
+            | list
+          }}
+        lights_to_turn_off: >-
+          {{
+            kantoor_lights
+            | reject('in', excluded_lights)
+            | list
+          }}
 
-            - if:
-                - condition: template
-                  value_template: "{{ lights_to_turn_off | count > 0 }}"
-              then:
-                - action: light.turn_off
-                  target:
-                    entity_id: "{{ lights_to_turn_off }}"
+    - if:
+        - condition: template
+          value_template: "{{ lights_to_turn_off | count > 0 }}"
+      then:
+        - action: light.turn_off
+          target:
+            entity_id: "{{ lights_to_turn_off }}"
 
-            - action: media_player.media_pause
-              target:
-                entity_id: media_player.kantoor_homepod
+    - action: media_player.media_pause
+      target:
+        entity_id: media_player.kantoor_homepods
 
-            - action: light.turn_off
-              target:
-                entity_id: light.shapes_11a9
+    - action: light.turn_off
+      target:
+        entity_id: light.shapes_11a9
 
-            - delay: "00:00:01"
+    - delay: "00:00:01"
 
-            - action: light.turn_off
-              target:
-                entity_id: light.shapes_11a9
+    - action: light.turn_off
+      target:
+        entity_id: light.shapes_11a9
 
-            - delay: "00:00:05"
-    
-            - action: script.macbook_sleep
+    - delay: "00:00:05"
 
-        - conditions:
-            - condition: trigger
-              id: door_opened
-          sequence: []
-
-        - conditions:
-            - condition: trigger
-              id: workmode_on
-          sequence: []
+    - action: script.macbook_sleep
 
 # - alias: Kantoor - Hue Tap bediening
 #   id: kantoor_hue_tap_bediening
@@ -498,16 +476,16 @@
 #             - choose:
 #                 - conditions:
 #                     - condition: state
-#                       entity_id: media_player.kantoor_homepod
+#                       entity_id: media_player.kantoor_homepods
 #                       state: "playing"
 #                   sequence:
 #                     - action: media_player.media_pause
 #                       target:
-#                         entity_id: media_player.kantoor_homepod
+#                         entity_id: media_player.kantoor_homepods
 #               default:
 #                 - action: media_player.media_play
 #                   target:
-#                     entity_id: media_player.kantoor_homepod
+#                     entity_id: media_player.kantoor_homepods
 
 #         - conditions:
 #             - condition: template
