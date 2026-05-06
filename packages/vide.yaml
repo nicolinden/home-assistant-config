@@ -1,0 +1,2 @@
+template: !include ../package_areas/vide/templates.yaml
+light: !include ../package_areas/vide/lights.yaml

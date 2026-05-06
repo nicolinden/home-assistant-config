@@ -1,0 +1,7 @@
+- platform: group
+  name: Vide lampen
+  unique_id: vide_lights
+  entities:
+    - light.jesse_vide
+    - light.ledstrip_vide
+    - light.shapes_jesse

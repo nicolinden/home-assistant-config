@@ -24,3 +24,7 @@ macbook_sleep_in_progress:
 kantoor_work_mode:
   name: Kantoor work mode
   icon: mdi:briefcase
+
+kantoor_manual_presence:
+  name: Kantoor handmatige aanwezigheid
+  icon: mdi:account-check

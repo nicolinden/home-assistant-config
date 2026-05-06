@@ -5,7 +5,7 @@
   trigger:
     - platform: sun
       event: sunset
-      offset: "-00:15:00"   # pas aan als je exact bij zonsondergang wilt
+      offset: "-00:15:00" # pas aan als je exact bij zonsondergang wilt
 
   action:
     - service: scene.turn_on
@@ -23,6 +23,12 @@
       target:
         entity_id: light.trap
 
+    - service: light.turn_on
+      target:
+        entity_id: light.woonkamer_led
+      data:
+        brightness_pct: 30
+        color_temp: 370
 
 - alias: Ochtend reset - verlichting uit na zonsopkomst
   id: ochtend_reset_verlichting

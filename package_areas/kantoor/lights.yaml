@@ -6,6 +6,7 @@
     - light.kantoor_bloom
     - light.psv_lamp
     - light.shapes_11a9
+    - light.kantoor_lightstrip
 
 - platform: group
   name: Kantoor lampen
@@ -16,4 +17,6 @@
     - light.psv_lamp
     - light.shapes_11a9
     - light.kantoor_plafond
-
+    - light.tuya_ledstrip
+    - light.hue_smart_plug
+    - light.kantoor_lightstrip

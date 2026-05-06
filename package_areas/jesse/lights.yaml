@@ -4,7 +4,7 @@
   entities:
     - light.ikea_of_sweden_ormanas_led_strip
     - light.jesse_plafond
-    - light.jesse_vide
+    # - light.jesse_vide
     - light.plug_mini_eu
     - light.lines_cbe8
     - light.jesse_bureaulamp_2
