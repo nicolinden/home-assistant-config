@@ -26,6 +26,10 @@ kantoor_mode_work:
       target:
         entity_id: scene.kantoor_kantoor_sfeer
 
+    - action: script.turn_on
+      target:
+        entity_id: script.kantoor_dynamic_theme
+
     - action: media_player.media_play
       target:
         entity_id: media_player.kantoor_2
@@ -49,6 +53,10 @@ kantoor_mode_teamscall:
       target:
         entity_id: scene.kantoor_kantoor_sfeer
 
+    - action: script.turn_on
+      target:
+        entity_id: script.kantoor_dynamic_theme
+
     - action: media_player.media_pause
       target:
         entity_id: media_player.kantoor_2
@@ -68,6 +76,10 @@ kantoor_mode_night:
       target:
         entity_id: input_boolean.kantoor_work_mode
 
+    - action: script.turn_off
+      target:
+        entity_id: script.kantoor_dynamic_theme
+
     - action: scene.turn_on
       target:
         entity_id: scene.kantoor_nachtlampje
@@ -78,7 +90,10 @@ kantoor_mode_night:
 
     - action: light.turn_off
       target:
-        entity_id: light.shapes_11a9
+        entity_id:
+          - light.shapes_11a9
+          - light.tuya_ledstrip
+          - light.kantoor_bloom
 
 kantoor_toggle_media:
   alias: Kantoor - Toggle media
@@ -111,12 +126,19 @@ kantoor_toggle_work_mode:
         - action: input_boolean.turn_off
           target:
             entity_id: input_boolean.kantoor_work_mode
+
+        - action: script.turn_off
+          target:
+            entity_id: script.kantoor_dynamic_theme
       else:
         - action: input_boolean.turn_on
           target:
             entity_id: input_boolean.kantoor_work_mode
 
-# TEST VOOR TRANSITION
+        - action: script.turn_on
+          target:
+            entity_id: script.kantoor_dynamic_theme
+
 kantoor_dynamic_theme:
   alias: Kantoor - Dynamisch kleurenthema
   mode: restart
@@ -126,59 +148,160 @@ kantoor_dynamic_theme:
           - condition: template
             value_template: "{{ true }}"
         sequence:
-          # Teal / Violet
+          # Ronde 1
           - action: light.turn_on
             target:
               entity_id: light.kantoor_bloom
             data:
               brightness_pct: 100
-              rgb_color: [0, 190, 160]
-              transition: 60
+              rgb_color: [0, 190, 160] # teal
+              transition: 75
 
           - action: light.turn_on
             target:
               entity_id: light.tuya_ledstrip
             data:
               brightness_pct: 45
-              rgb_color: [140, 45, 255]
+              rgb_color: [35, 100, 255] # blauw
+              transition: 75
+
+          - action: light.turn_on
+            target:
+              entity_id: light.kast_ledstrip_02
+            data:
+              brightness_pct: 45
+              rgb_color: [145, 45, 255] # violet
+              transition: 75
+
+          - action: light.turn_on
+            target:
+              entity_id: light.light_kast_ledstrip_03
+            data:
+              brightness_pct: 45
+              rgb_color: [255, 40, 150] # magenta
               transition: 75
 
           - delay: "00:01:15"
 
-          # Blauw / Magenta
+          # Ronde 2 - kleuren schuiven door
           - action: light.turn_on
             target:
               entity_id: light.kantoor_bloom
             data:
               brightness_pct: 100
-              rgb_color: [35, 100, 255]
-              transition: 60
+              rgb_color: [255, 40, 150] # magenta
+              transition: 75
 
           - action: light.turn_on
             target:
               entity_id: light.tuya_ledstrip
             data:
               brightness_pct: 45
-              rgb_color: [255, 40, 150]
+              rgb_color: [0, 190, 160] # teal
+              transition: 75
+
+          - action: light.turn_on
+            target:
+              entity_id: light.kast_ledstrip_02
+            data:
+              brightness_pct: 45
+              rgb_color: [35, 100, 255] # blauw
+              transition: 75
+
+          - action: light.turn_on
+            target:
+              entity_id: light.light_kast_ledstrip_03
+            data:
+              brightness_pct: 45
+              rgb_color: [145, 45, 255] # violet
               transition: 75
 
           - delay: "00:01:15"
 
-          # Violet / Teal
+          # Ronde 3
           - action: light.turn_on
             target:
               entity_id: light.kantoor_bloom
             data:
               brightness_pct: 100
-              rgb_color: [150, 45, 255]
-              transition: 60
+              rgb_color: [145, 45, 255] # violet
+              transition: 75
 
           - action: light.turn_on
             target:
               entity_id: light.tuya_ledstrip
             data:
               brightness_pct: 45
-              rgb_color: [0, 190, 160]
+              rgb_color: [255, 40, 150] # magenta
+              transition: 75
+
+          - action: light.turn_on
+            target:
+              entity_id: light.kast_ledstrip_02
+            data:
+              brightness_pct: 45
+              rgb_color: [0, 190, 160] # teal
+              transition: 75
+
+          - action: light.turn_on
+            target:
+              entity_id: light.light_kast_ledstrip_03
+            data:
+              brightness_pct: 45
+              rgb_color: [35, 100, 255] # blauw
               transition: 75
 
           - delay: "00:01:15"
+
+          # Ronde 4
+          - action: light.turn_on
+            target:
+              entity_id: light.kantoor_bloom
+            data:
+              brightness_pct: 100
+              rgb_color: [35, 100, 255] # blauw
+              transition: 75
+
+          - action: light.turn_on
+            target:
+              entity_id: light.tuya_ledstrip
+            data:
+              brightness_pct: 45
+              rgb_color: [145, 45, 255] # violet
+              transition: 75
+
+          - action: light.turn_on
+            target:
+              entity_id: light.kast_ledstrip_02
+            data:
+              brightness_pct: 45
+              rgb_color: [255, 40, 150] # magenta
+              transition: 75
+
+          - action: light.turn_on
+            target:
+              entity_id: light.light_kast_ledstrip_03
+            data:
+              brightness_pct: 45
+              rgb_color: [0, 190, 160] # teal
+              transition: 75
+
+          - delay: "00:01:15"
+
+kantoor_toggle_dynamic_theme:
+  alias: Kantoor - Toggle dynamic theme
+  icon: mdi:palette
+  mode: restart
+  sequence:
+    - if:
+        - condition: state
+          entity_id: script.kantoor_dynamic_theme
+          state: "on"
+      then:
+        - action: script.turn_off
+          target:
+            entity_id: script.kantoor_dynamic_theme
+      else:
+        - action: script.turn_on
+          target:
+            entity_id: script.kantoor_dynamic_theme

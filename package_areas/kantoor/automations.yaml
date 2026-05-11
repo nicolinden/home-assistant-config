@@ -40,9 +40,14 @@
               entity_id: input_boolean.kantoor_work_mode
               state: "off"
           sequence:
+            - action: script.turn_off
+              target:
+                entity_id: script.kantoor_dynamic_theme
+
             - action: switch.turn_on
               target:
                 entity_id: switch.kantoor_camera
+
             - action: script.macbook_sleep
 
 - alias: Kantoor - deur open zet juiste mode
@@ -67,6 +72,10 @@
               target:
                 entity_id: scene.kantoor_kleur_werk_sfeer
 
+            - action: script.turn_on
+              target:
+                entity_id: script.kantoor_dynamic_theme
+
             - action: light.turn_on
               target:
                 entity_id: light.kantoor_plafond
@@ -78,7 +87,6 @@
                 entity_id:
                   - light.shapes_11a9
                   - light.hue_smart_plug
-                  - light.tuya_ledstrip
               data:
                 effect: "Neon Tokyo"
 
@@ -90,13 +98,20 @@
                 - condition: time
                   before: "07:30:00"
           sequence:
+            - action: script.turn_off
+              target:
+                entity_id: script.kantoor_dynamic_theme
+
             - action: scene.turn_on
               target:
                 entity_id: scene.kantoor_nachtlampje
 
             - action: light.turn_off
               target:
-                entity_id: light.shapes_11a9
+                entity_id:
+                  - light.shapes_11a9
+                  - light.tuya_ledstrip
+                  - light.kantoor_bloom
 
 - alias: Kantoor - deur dicht en geen workmode is alles uit
   id: kantoor_door_dicht_geen_workmode_alles_uit
@@ -148,6 +163,10 @@
       entity_id: input_boolean.kantoor_manual_presence
       state: "off"
 
+    - action: script.turn_off
+      target:
+        entity_id: script.kantoor_dynamic_theme
+
     - variables:
         kantoor_lights: >-
           {{
@@ -186,6 +205,7 @@
           - light.shapes_11a9
           - light.hue_smart_plug
           - light.tuya_ledstrip
+          - light.kantoor_bloom
 
     - delay: "00:00:05"
 
@@ -212,3 +232,19 @@
     - action: input_boolean.turn_on
       target:
         entity_id: input_boolean.kantoor_manual_presence
+
+- alias: Kantoor - stop dynamic theme als lamp uitgaat
+  id: kantoor_stop_dynamic_theme_bij_lamp_uit
+  mode: restart
+
+  triggers:
+    - trigger: state
+      entity_id:
+        - light.kantoor_bloom
+        - light.tuya_ledstrip
+      to: "off"
+
+  actions:
+    - action: script.turn_off
+      target:
+        entity_id: script.kantoor_dynamic_theme

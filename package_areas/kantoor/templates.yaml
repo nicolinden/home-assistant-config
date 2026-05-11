@@ -111,3 +111,21 @@
         {{ (trigger.event.data.humidity | string
             | replace(',', '.')
             | float) }}
+
+- switch:
+    - name: "Kantoor Dynamic Theme"
+      unique_id: kantoor_dynamic_theme_switch
+      icon: mdi:palette
+
+      state: >
+        {{ is_state('script.kantoor_dynamic_theme', 'on') }}
+
+      turn_on:
+        - action: script.turn_on
+          target:
+            entity_id: script.kantoor_dynamic_theme
+
+      turn_off:
+        - action: script.turn_off
+          target:
+            entity_id: script.kantoor_dynamic_theme

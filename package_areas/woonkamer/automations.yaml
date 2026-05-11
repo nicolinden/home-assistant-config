@@ -17,49 +17,54 @@
       target:
         entity_id: input_boolean.homepod_push_woonkamer
 
-# Als de HDMI dropdown verandert, voer dan ook echt de bronwissel uit
 - alias: Woonkamer - HDMI dropdown gewijzigd
   id: woonkamer_tv_hdmi_dropdown_gewijzigd
   mode: restart
   trigger:
     - platform: state
       entity_id: input_select.woonkamer_tv_channel
-  condition:
-    - condition: template
-      value_template: >
-        {{ trigger.to_state.state in ['Apple TV', 'Nintendo', 'Ziggo', 'Sonos'] }}
   action:
     - choose:
         - conditions:
-            - condition: state
-              entity_id: input_select.woonkamer_tv_channel
-              state: "Apple TV"
+            - condition: template
+              value_template: "{{ trigger.to_state.state == 'Apple TV' }}"
           sequence:
-            - service: script.woonkamer_tv_set_channel_apple_tv
+            - service: media_player.select_source
+              target:
+                entity_id: media_player.55oled705_12
+              data:
+                source: "HDMI 3"
 
         - conditions:
-            - condition: state
-              entity_id: input_select.woonkamer_tv_channel
-              state: "Nintendo"
+            - condition: template
+              value_template: "{{ trigger.to_state.state == 'Nintendo' }}"
           sequence:
-            - service: script.woonkamer_tv_set_channel_nintendo
+            - service: media_player.select_source
+              target:
+                entity_id: media_player.55oled705_12
+              data:
+                source: "HDMI 1"
 
         - conditions:
-            - condition: state
-              entity_id: input_select.woonkamer_tv_channel
-              state: "Ziggo"
+            - condition: template
+              value_template: "{{ trigger.to_state.state == 'Ziggo' }}"
           sequence:
-            - service: script.woonkamer_tv_set_channel_ziggo
+            - service: media_player.select_source
+              target:
+                entity_id: media_player.55oled705_12
+              data:
+                source: "HDMI 4"
 
         - conditions:
-            - condition: state
-              entity_id: input_select.woonkamer_tv_channel
-              state: "Sonos"
+            - condition: template
+              value_template: "{{ trigger.to_state.state == 'Sonos' }}"
           sequence:
-            - service: script.woonkamer_tv_set_channel_sonos
+            - service: media_player.select_source
+              target:
+                entity_id: media_player.55oled705_12
+              data:
+                source: "HDMI 2"
 
-# Als app in dropdown verandert terwijl Apple TV als HDMI-kanaal gekozen is,
-# open dan die app op de Apple TV
 - alias: Woonkamer - Apple TV app geselecteerd
   id: woonkamer_appletv_app_geselecteerd
   mode: restart
@@ -79,21 +84,3 @@
         entity_id: media_player.woonkamer_tv
       data:
         source: "{{ trigger.to_state.state }}"
-
-# Als het scherm uit gaat, zet de UI terug op "Uit"
-- alias: Woonkamer - TV uit => kanaal Uit
-  id: woonkamer_tv_uit_kanaal_uit
-  mode: single
-  trigger:
-    - platform: state
-      entity_id: binary_sensor.woonkamer_tv_on
-      to: "off"
-    - platform: state
-      entity_id: switch.55oled705_12_screen_state
-      to: "unavailable"
-  action:
-    - service: input_select.select_option
-      target:
-        entity_id: input_select.woonkamer_tv_channel
-      data:
-        option: "Apple TV"

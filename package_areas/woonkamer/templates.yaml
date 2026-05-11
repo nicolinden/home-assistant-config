@@ -1,3 +1,18 @@
+- switch:
+    - name: woonkamer_northern_lights_theme
+      unique_id: woonkamer_northern_lights_theme
+      icon: mdi:aurora
+      state: >
+        {{ is_state('script.woonkamer_northern_lights_theme', 'on') }}
+      turn_on:
+        - action: script.turn_on
+          target:
+            entity_id: script.woonkamer_northern_lights_theme
+      turn_off:
+        - action: script.turn_off
+          target:
+            entity_id: script.woonkamer_northern_lights_theme
+
 - binary_sensor:
     # True zodra er in de woonkamer minimaal 1 "meetellende" lamp aan staat
     - name: woonkamer_lights_on
